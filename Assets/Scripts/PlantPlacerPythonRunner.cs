@@ -32,8 +32,6 @@ public class PlantPlacerPythonRunner
     {
         var streamWriter = process.StandardInput;
         streamWriter.WriteLine("generate={0},{1}", tileIndex[0], tileIndex[1]);
-
-        cachedPreviousRequest = tileIndex;
     }
 
     public bool PollTileGenerationComplete()
@@ -43,10 +41,13 @@ public class PlantPlacerPythonRunner
 
     private Process process;
 
-    private struct GenerationResult
+    public struct GenerationResult
     {
         public List<Vector2> relativeTreePositions;
     }
-    private Vector2Int cachedPreviousRequest;
-    private GenerationResult cachedPreviousResult;
+    public GenerationResult CachedPreviousResult
+    {
+        get;
+        private set;
+    }
 }

@@ -8,6 +8,15 @@ public class PlantPlacerRuntime : MonoBehaviour
     [SerializeField]
     private PlantPlacerModel model = null;
 
+    [SerializeField]
+    private float tileWidth = 10f;
+
+    [SerializeField]
+    private Terrain targetTerrain = null;
+
+    [SerializeField]
+    private GameObject spawnableTreePrefab = null;
+
     private List<Vector2Int> queuedUpdates = new List<Vector2Int>();
 
     public void OnLandscapeUpdated(Vector2Int tileIndex)
@@ -30,6 +39,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private void Start()
     {
         StartCoroutine(RegenerateTiles());
+        StartCoroutine(PlaceTrees());
     }
 
     private IEnumerator RegenerateTiles()
@@ -45,6 +55,39 @@ public class PlantPlacerRuntime : MonoBehaviour
             pythonRunner.StartGenerating(thisUpdateTile);
 
             yield return new WaitUntil(() => pythonRunner.PollTileGenerationComplete());
+
+            var tileGenerationResults = pythonRunner.CachedPreviousResult;
+            EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions);
         }
     }
+
+    private void EnqueueTreePlacements(Vector2Int updateTile, List<Vector2> tileGenerationResults)
+    {
+        var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y) * tileWidth;
+        var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
+        queuedTreePlacements.AddRange(worldPositions);
+    }
+
+    private IEnumerator PlaceTrees()
+    {
+        while (true)
+        {
+            yield return new WaitUntil(() => queuedTreePlacements.Count > 0);
+
+            var thisNewTree = queuedTreePlacements.First();
+            queuedTreePlacements.RemoveAt(0);
+
+            SpawnTree(thisNewTree);
+        }
+    }
+
+    private void SpawnTree(Vector2 treeXzPosition)
+    {
+        var treeXzPosition3 = new Vector3(treeXzPosition[0], 0f, treeXzPosition[1]);
+        var height = targetTerrain.SampleHeight(treeXzPosition3);
+        var treePosition = treeXzPosition3 + Vector3.up * height;
+        Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
+    }
+
+    private List<Vector2> queuedTreePlacements = new List<Vector2>();
 }
