@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,9 +12,11 @@ public class PlantPlacerPythonRunner
         FeedModelToProcess(model);
     }
 
+    private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "Inference.py");
     private void StartProcess()
     {
-        var startInfo = new ProcessStartInfo("path/to/executable");
+        var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
+        var startInfo = new ProcessStartInfo(fullPathToPython);
         startInfo.RedirectStandardInput = true;
         startInfo.UseShellExecute = false;
 

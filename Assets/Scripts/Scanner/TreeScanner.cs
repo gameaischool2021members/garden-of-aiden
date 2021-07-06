@@ -10,7 +10,7 @@ public class TreeScanner
     private int textureGradiantRadius = 10;
 
     private float[,] texture;
-    private float scannerReach = 10f;
+    public const float scannerReach = 10f;
     private Vector2 scanerCenterPoint = new Vector2(0f, 0f);
 
 

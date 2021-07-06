@@ -21,7 +21,7 @@ public class PlantPlacerRootEditor : Editor
         {
             UnityEngine.Debug.LogFormat("Starting training");
             var trainedModel = TrainModel(debugModelValue);
-            SaveToModelAsset(debugModelValue, TargetModel);
+            SaveToModelAsset(trainedModel, TargetModel);
         }
 
         EditorGUILayout.HelpBox("The following controls have not been implemented yet", MessageType.Info, wide:true);
@@ -47,12 +47,15 @@ public class PlantPlacerRootEditor : Editor
         UnityEngine.Debug.LogFormat("Running python script {0} - {1}", fullPathToPython, startInfo.Arguments);
 
         startInfo.UseShellExecute = false;
+        startInfo.RedirectStandardInput = true;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
 
         Process process = new Process();
         process.StartInfo = startInfo;
         process.Start();
+
+        CollectAndSendTrainingDataToTrainer(process);
 
         var hasClosed = process.WaitForExit(modelTrainingTimeout);
 
@@ -65,6 +68,39 @@ public class PlantPlacerRootEditor : Editor
         // Debug implementation
         var output = float.Parse(outputString);
         return output;
+    }
+
+    private void CollectAndSendTrainingDataToTrainer(Process process)
+    {
+        var scanner = new TreeScanner();
+
+        var terrain = TargetComponent.GetComponent<Terrain>();
+        var centerPointBounds = terrain.terrainData.bounds;
+        centerPointBounds.Expand((Vector3.right + Vector3.forward) * -TreeScanner.scannerReach);
+        var centerPointMin = new Vector2(centerPointBounds.min.x, centerPointBounds.min.z);
+        var centerPointMax = new Vector2(centerPointBounds.max.x, centerPointBounds.max.z);
+
+        for (var attemptIndex = 0; attemptIndex < 100; ++attemptIndex)
+        {
+            var centerPoint = new Vector2(
+                UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),
+                UnityEngine.Random.Range(centerPointMin.y, centerPointMax.y)
+            );
+
+            // collect data
+            var treeProximityMap = scanner.ScannForTrees(centerPoint).GetJagged();
+
+            // send data to process
+            process.StandardInput.WriteLine("{" +
+                String.Join(",",
+                    treeProximityMap.Select(column =>
+                        "{" + String.Join(",", column) + "}"
+                    )
+                )
+            + "}");
+        }
+
+        process.StandardInput.WriteLine("finish");
     }
 
     private static void DoIfAnyNonEmptyStrings(String output, Action<String> action)
@@ -107,6 +143,8 @@ public class PlantPlacerRootEditor : Editor
         outputModel.placerParameter = param;
     }
 
+    private PlantPlacerRoot TargetComponent =>
+        (PlantPlacerRoot)serializedObject.targetObject;
     private PlantPlacerModel TargetModel => 
         (PlantPlacerModel)serializedObject.FindProperty(PlantPlacerRoot.modelPropertyName).objectReferenceValue;
     
