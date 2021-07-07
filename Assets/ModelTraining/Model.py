@@ -18,6 +18,7 @@ from matplotlib import pyplot
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.datasets.fashion_mnist import load_data
+from numpy import expand_dims
 
 # define the discriminator model
 def define_discriminator(image_shape):
@@ -30,26 +31,26 @@ def define_discriminator(image_shape):
 	# concatenate images channel-wise
 	merged = Concatenate()([in_src_image, in_target_image])
 	# C64
-	d = Conv2D(16, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(merged)
+	d = Conv2D(16, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(merged)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C128
-	d = Conv2D(32, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(32, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C256
-	d = Conv2D(64, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(64, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C512
-	d = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# second last output layer
-	d = Conv2D(128, (4,4), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (8, 8), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# output
-	d = Conv2D(1, (4,4), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(1, (8, 8), padding='same', kernel_initializer=init)(d)
 	out_layer = Activation('sigmoid')(d)
 	# define model
 	model = Model([in_src_image, in_target_image], out_layer)
@@ -63,7 +64,7 @@ def define_encoder_block(layer_in, n_filters, batchnorm=True):
 	# weight initialization
 	init = RandomNormal(stddev=0.02)
 	# add downsampling layer
-	g = Conv2D(n_filters, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(layer_in)
+	g = Conv2D(n_filters, (8, 8), strides=(2, 2), padding='same', kernel_initializer=init)(layer_in)
 	# conditionally add batch normalization
 	if batchnorm:
 		g = BatchNormalization()(g, training=True)
@@ -76,7 +77,7 @@ def decoder_block(layer_in, skip_in, n_filters, dropout=True):
 	# weight initialization
 	init = RandomNormal(stddev=0.02)
 	# add upsampling layer
-	g = Conv2DTranspose(n_filters, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(layer_in)
+	g = Conv2DTranspose(n_filters, (8, 8), strides=(2, 2), padding='same', kernel_initializer=init)(layer_in)
 	# add batch normalization
 	g = BatchNormalization()(g, training=True)
 	# conditionally add dropout
@@ -100,21 +101,21 @@ def define_generator(image_shape=(256,256,3)):
 	e3 = define_encoder_block(e2, 64)
 	e4 = define_encoder_block(e3, 128)
 	e5 = define_encoder_block(e4, 128)
-	e6 = define_encoder_block(e5, 128)
-	e7 = define_encoder_block(e6, 128)
+	#e6 = define_encoder_block(e5, 128)
+	#e7 = define_encoder_block(e6, 128)
 	# bottleneck, no batch norm and relu
-	b = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(e7)
+	b = Conv2D(128, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(e5)
 	b = Activation('relu')(b)
 	# decoder model
-	d1 = decoder_block(b, e7, 128)
-	d2 = decoder_block(d1, e6, 128)
-	d3 = decoder_block(d2, e5, 128)
+	#d1 = decoder_block(b, e7, 128)
+	#d2 = decoder_block(b, e6, 128)
+	d3 = decoder_block(b, e5, 128)
 	d4 = decoder_block(d3, e4, 128, dropout=False)
 	d5 = decoder_block(d4, e3, 64, dropout=False)
 	d6 = decoder_block(d5, e2, 32, dropout=False)
 	d7 = decoder_block(d6, e1, 16, dropout=False)
 	# output
-	g = Conv2DTranspose(3, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d7)
+	g = Conv2DTranspose(3, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d7)
 	out_image = Activation('tanh')(g)
 	# define model
 	model = Model(in_image, out_image)
@@ -140,17 +141,20 @@ def define_gan(g_model, d_model, image_shape):
 	return model
 
 
-def load_random_samples(shape=(1000, 256, 256, 3)):
-	# load dataset
+def load_random_samples(shape=(1000, 64, 64, 3)):
+	# generate random dataset
 	trainy = np.random.default_rng().uniform(size=shape)
 	trainX = np.random.default_rng().uniform(size=shape)
-	
 	return [trainX, trainy]
 
 # select a batch of random samples, returns images and target
-def generate_real_samples(dataset, n_samples, patch_shape):
+def generate_real_samples(dataset, n_samples, patch_shape, augmented=False):
 	# unpack dataset
 	trainA, trainB = dataset
+	# 
+	if (augmented):
+		trainA, trainB = next(augment_data(dataset, batch_size=dataset[0].shape[0]))
+
 	# choose random instances
 	ix = randint(0, trainA.shape[0], n_samples)
 	# retrieve selected images
@@ -159,6 +163,7 @@ def generate_real_samples(dataset, n_samples, patch_shape):
 	y = ones((n_samples, patch_shape, patch_shape, 1))
 	return [X1, X2], y
 
+
 # generate a batch of images, returns images and targets
 def generate_fake_samples(g_model, samples, patch_shape):
 	# generate fake instance
@@ -166,6 +171,7 @@ def generate_fake_samples(g_model, samples, patch_shape):
 	# create 'fake' class labels (0)
 	y = zeros((len(X), patch_shape, patch_shape, 1))
 	return X, y
+
 
 # generate samples and save as a plot and save the model
 def summarize_performance(step, g_model, dataset, n_samples=3):
@@ -201,8 +207,9 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 	g_model.save(filename2)
 	print('>Saved: %s and %s' % (filename1, filename2))
 
-# train pix2pix models
-def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
+
+# train models
+def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1, augmented=False):
 	# determine the output square shape of the discriminator
 	n_patch = d_model.output_shape[1]
 	# unpack dataset
@@ -214,7 +221,7 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 	# manually enumerate epochs
 	for i in range(n_steps):
 		# select a batch of real samples
-		[X_realA, X_realB], y_real = generate_real_samples(dataset, n_batch, n_patch)
+		[X_realA, X_realB], y_real = generate_real_samples(dataset, n_batch, n_patch, augmented=augmented)
 		# generate a batch of fake samples
 		X_fakeB, y_fake = generate_fake_samples(g_model, X_realA, n_patch)
 		# update discriminator for real samples
@@ -229,7 +236,48 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 		if (i+1) % (bat_per_epo * 10) == 0:
 			summarize_performance(i, g_model, dataset)
 
+# create iterators for both sets of images with rotation, zoom, width and height shift applied
+def augment_data(dataset, batch_size=1):
+	X, y = dataset
+	seed = 1
+	# generator params
+	data_gen_args = dict(
+		rotation_range=90,
+        zoom_range=0.1,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=True
+		)
+	# create and fit both generators with the same seed and args
+	datagen_x = ImageDataGenerator(**data_gen_args)
+	datagen_y = ImageDataGenerator(**data_gen_args)
+	datagen_x.fit(X, seed=seed)
+	datagen_y.fit(y, seed=seed)
 
+	return zip(datagen_x.flow(X, seed=seed, batch_size=batch_size), datagen_y.flow(y, seed=seed, batch_size=batch_size))
+
+
+def verify_augmentation():
+	# load some data
+	(trainX, _), (_, _) = load_data()
+	(trainZ, _), (_, _) = load_data()
+	# augment data
+	augmented_data = augment_data([expand_dims(trainX, axis=-1), expand_dims(trainZ, axis=-1)], batch_size=trainX.shape[0])
+	# verify data is one-to-one
+	for _ in range(10):
+		a, b = next(augmented_data)
+		print((a == b).all())
+		print(a.shape)
+	
+	a, b = next(augmented_data)
+	assert((a == b).all())
+
+
+# dataset type: [np.Array, np.Array]
+# each array must have the same shape
+# dataset[0] should be the input data to the generator
+# dataset[1] should be the example of the corresponding vegetation map
 def load_data_and_train(dataset=None):
 	# load image data
 	if dataset is None:
@@ -245,9 +293,10 @@ def load_data_and_train(dataset=None):
 	# define the composite model
 	gan_model = define_gan(g_model, d_model, image_shape)
 	# train model
-	train(d_model, g_model, gan_model, dataset)
+	train(d_model, g_model, gan_model, dataset, augmented=True)
 	return 0
 
+# for rapid testing with different data shapes
 import sys
 if __name__ == "__main__":
 	sys.exit(load_data_and_train(None))
