@@ -55,6 +55,7 @@ public class TreePlacer
 
 	private List<Vector2Int> FindTrees()
     {
+		InitializeSeachSpace();
 		List<Vector2Int> treePositionsOnTexture = new List<Vector2Int>();
 		for (int x = 0; x < textureSizeX; x++)
 		{
