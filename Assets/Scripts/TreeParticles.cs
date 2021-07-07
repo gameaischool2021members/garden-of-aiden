@@ -28,10 +28,27 @@ public class TreeParticles : MonoBehaviour
         
     }
 
+    Color GetColor()
+    {
+        Material[] treeMaterials = gameObject.GetComponent<Renderer>().materials;
+
+        //for (int i = 0; i < treeMaterials.Length; i++)
+        //{
+        //    treeMaterials[i].color = Color.red;
+        //}
+
+        return treeMaterials[0].color;
+    }
+
     void OnDestroy()
     {
         GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 1.5f, 0), leaves.transform.rotation);
         leavesParticles = endLeaves.GetComponentInChildren<ParticleSystem>();
+
+        var main = leavesParticles.main;
+        Color treeColor = GetColor();
+        main.startColor = new Color(treeColor.r, treeColor.g, treeColor.b, treeColor.a);
+
         leavesParticles.Play();
     }
 }
