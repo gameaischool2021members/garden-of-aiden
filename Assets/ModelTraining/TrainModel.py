@@ -1,12 +1,15 @@
 #!python
 
 import sys
-import typing
+import time
+from typing import *
 import numpy
 from argparse import *
+import matplotlib.pyplot as plt
 
 class TrainingInstance():
-  def __init__(self):
+  def __init__(self, data : numpy.ndarray):
+    self.data = data
     pass
 
 def main():
@@ -21,7 +24,7 @@ def main():
 
   return 0
 
-def collect_training_data() -> typing.List[TrainingInstance]:
+def collect_training_data() -> List[TrainingInstance]:
   training_data = []
 
   for line in sys.stdin:
@@ -30,12 +33,18 @@ def collect_training_data() -> typing.List[TrainingInstance]:
 
     if 'begin_training_instance' == line.rstrip():
       serialized_training_instance = []
-      for line in sys.stdin:
-        if 'end_training_instance'==line.rstrip():
+      for line in (line.rstrip() for line in sys.stdin):
+        if 'end_training_instance'==line:
           break
         serialized_training_instance += [line]
 
-      training_data += [parse_training_data(serialized_training_instance)]
+      training_instance = parse_training_data(serialized_training_instance)
+
+      plt.imshow(training_instance.data, cmap='hot')
+      # plt.imshow(numpy.zeros([100,100]), cmap='hot')
+      plt.show()
+
+      training_data += [training_instance]
 
   return training_data
 
@@ -54,10 +63,11 @@ def parse_training_data(training_data_serialized : List[str]) -> TrainingInstanc
   #   throw 'missing prefix'
 
   #plants_data_serialized = training_data_serialized[len(plants_prefix):]
-  numpy.fromstring(plants_data_serialized)
-  return TrainingInstance()
+  assert(len(training_data_serialized) > 0)
+  data = numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in training_data_serialized])
+  return TrainingInstance(data)
 
-def train_on_data(training_data : typing.List[TrainingInstance]):
+def train_on_data(training_data : List[TrainingInstance]):
 
   # debug value to satisfy debug requirements from Unity
   # replace with serialized model when finished

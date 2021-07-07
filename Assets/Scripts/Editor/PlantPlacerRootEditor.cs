@@ -32,7 +32,7 @@ public class PlantPlacerRootEditor : Editor
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
-    private const int modelTrainingTimeout = 30000;
+    private const int modelTrainingTimeout = 5000;
     private float TrainModel(float arbitraryInput)
     {
         var startInfo = new ProcessStartInfo();
@@ -55,11 +55,18 @@ public class PlantPlacerRootEditor : Editor
         process.StartInfo = startInfo;
         process.Start();
 
-        CollectAndSendTrainingDataToTrainer(process);
+        try
+        {
+            CollectAndSendTrainingDataToTrainer(process);
 
-        var hasClosed = process.WaitForExit(modelTrainingTimeout);
+            var hasClosed = process.WaitForExit(modelTrainingTimeout);
 
-        Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+            Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogErrorFormat("Error: {0}", e.Message);
+        }
 
         var outputString = process.StandardOutput.ReadToEnd();
 
@@ -80,6 +87,8 @@ public class PlantPlacerRootEditor : Editor
         var centerPointMin = new Vector2(centerPointBounds.min.x, centerPointBounds.min.z);
         var centerPointMax = new Vector2(centerPointBounds.max.x, centerPointBounds.max.z);
 
+        var stdInput = process.StandardInput;
+
         for (var attemptIndex = 0; attemptIndex < 1; ++attemptIndex)
         {
             var centerPoint = new Vector2(
@@ -91,26 +100,16 @@ public class PlantPlacerRootEditor : Editor
             var treeProximityMap = scanner.ScannForTrees(centerPoint).GetJagged();
 
             // send data to process
-            process.StandardInput.WriteLine("plants");
+
+            stdInput.WriteLine("begin_training_instance");
             foreach (var mapLine in treeProximityMap)
             {
-                // process.StandardInput.WriteLine(String.Join(", ", mapLine));
-                process.StandardInput.WriteLine("0,0 0,0");
-                process.StandardInput.WriteLine("0,0 0,0");
-                process.StandardInput.WriteLine("0,0");
-                process.StandardInput.WriteLine("0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0,0");
-                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0,0,0");
+                stdInput.WriteLine(String.Join(" ", mapLine));
             }
-            process.StandardInput.WriteLine("end");
+            stdInput.WriteLine("end_training_instance");
         }
 
-        process.StandardInput.WriteLine("finish");
+        stdInput.WriteLine("finish");
     }
 
     private static void DoIfAnyNonEmptyStrings(String output, Action<String> action)
