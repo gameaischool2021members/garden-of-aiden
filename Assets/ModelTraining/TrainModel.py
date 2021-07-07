@@ -8,8 +8,9 @@ from argparse import *
 import matplotlib.pyplot as plt
 
 class TrainingInstance():
-  def __init__(self, data : numpy.ndarray):
-    self.data = data
+  def __init__(self, plant_data : numpy.ndarray, height_data : numpy.ndarray):
+    self.plant_data = plant_data
+    self.height_data = height_data
     pass
 
 def main():
@@ -41,13 +42,13 @@ def collect_training_data() -> List[TrainingInstance]:
 
       training_data += [training_instance]
 
-  # DEBUG_plot_first_instance(training_data)
+  DEBUG_plot_first_instance(training_data)
 
   return training_data
 
 def DEBUG_plot_first_instance(training_data):
   training_instance = training_data[0]
-  plt.imshow(training_instance.data, cmap='hot')
+  plt.imshow(training_instance.plant_data, cmap='hot')
   plt.show()
 
 plants_prefix = 'plants'
@@ -61,13 +62,26 @@ def parse_plants_data(input_stream) -> numpy.ndarray:
   return row_list
 
 def parse_training_data(training_data_serialized : List[str]) -> TrainingInstance:
-  # if not training_data_serialized.starts_with(plants_prefix):
-  #   throw 'missing prefix'
+  plant_data = None
+  height_data = None
 
-  #plants_data_serialized = training_data_serialized[len(plants_prefix):]
-  assert(len(training_data_serialized) > 0)
-  data = numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in training_data_serialized])
-  return TrainingInstance(data)
+  line_index = 0
+  while line_index < len(training_data_serialized):
+    this_line = training_data_serialized[line_index].rstrip()
+    line_index += 1
+
+    if this_line == 'plants':
+      plant_data = parse_serialized_numpy_array(training_data_serialized[line_index : line_index + 256])
+      line_index += 256
+
+    if this_line == 'heights':
+      height_data = parse_serialized_numpy_array(training_data_serialized[line_index : line_index + 256])
+      line_index += 256
+
+  return TrainingInstance(plant_data, height_data)
+
+def parse_serialized_numpy_array(serialized_numpy_data : List[str]) -> numpy.ndarray:
+  return numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in serialized_numpy_data])
 
 def train_on_data(training_data : List[TrainingInstance]):
 

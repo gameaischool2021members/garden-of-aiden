@@ -33,7 +33,6 @@ public class PlantPlacerRootEditor : Editor
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
-            "--",
         }.Select(arg => String.Format("\"{0}\"", arg)));
         UnityEngine.Debug.LogFormat("Running python script {0} - {1}", fullPathToPython, startInfo.Arguments);
 
@@ -100,6 +99,7 @@ public class PlantPlacerRootEditor : Editor
             // send data to process
 
             stdInput.WriteLine("begin_training_instance");
+            stdInput.WriteLine("plants");
             foreach (var mapLine in treeProximityMap)
             {
                 stdInput.WriteLine(String.Join(" ", mapLine));
