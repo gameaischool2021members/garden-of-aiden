@@ -1,8 +1,6 @@
-# example of pix2pix gan for satellite to map image-to-image translation
-from numpy import load
+import numpy as np
 from numpy import zeros
 from numpy import ones
-from numpy import expand_dims
 from numpy.random import randint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import RandomNormal
@@ -32,22 +30,22 @@ def define_discriminator(image_shape):
 	# concatenate images channel-wise
 	merged = Concatenate()([in_src_image, in_target_image])
 	# C64
-	d = Conv2D(64, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(merged)
+	d = Conv2D(16, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(merged)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C128
-	d = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(32, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C256
-	d = Conv2D(256, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(64, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C512
-	d = Conv2D(512, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# second last output layer
-	d = Conv2D(512, (4,4), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (4,4), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# output
@@ -97,24 +95,24 @@ def define_generator(image_shape=(256,256,3)):
 	# image input
 	in_image = Input(shape=image_shape)
 	# encoder model
-	e1 = define_encoder_block(in_image, 64, batchnorm=False)
-	e2 = define_encoder_block(e1, 128)
-	e3 = define_encoder_block(e2, 256)
-	e4 = define_encoder_block(e3, 512)
-	e5 = define_encoder_block(e4, 512)
-	e6 = define_encoder_block(e5, 512)
-	e7 = define_encoder_block(e6, 512)
+	e1 = define_encoder_block(in_image, 16, batchnorm=False)
+	e2 = define_encoder_block(e1, 32)
+	e3 = define_encoder_block(e2, 64)
+	e4 = define_encoder_block(e3, 128)
+	e5 = define_encoder_block(e4, 128)
+	e6 = define_encoder_block(e5, 128)
+	e7 = define_encoder_block(e6, 128)
 	# bottleneck, no batch norm and relu
-	b = Conv2D(512, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(e7)
+	b = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(e7)
 	b = Activation('relu')(b)
 	# decoder model
-	d1 = decoder_block(b, e7, 512)
-	d2 = decoder_block(d1, e6, 512)
-	d3 = decoder_block(d2, e5, 512)
-	d4 = decoder_block(d3, e4, 512, dropout=False)
-	d5 = decoder_block(d4, e3, 256, dropout=False)
-	d6 = decoder_block(d5, e2, 128, dropout=False)
-	d7 = decoder_block(d6, e1, 64, dropout=False)
+	d1 = decoder_block(b, e7, 128)
+	d2 = decoder_block(d1, e6, 128)
+	d3 = decoder_block(d2, e5, 128)
+	d4 = decoder_block(d3, e4, 128, dropout=False)
+	d5 = decoder_block(d4, e3, 64, dropout=False)
+	d6 = decoder_block(d5, e2, 32, dropout=False)
+	d7 = decoder_block(d6, e1, 16, dropout=False)
 	# output
 	g = Conv2DTranspose(3, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d7)
 	out_image = Activation('tanh')(g)
@@ -141,28 +139,13 @@ def define_gan(g_model, d_model, image_shape):
 	model.compile(loss=['binary_crossentropy', 'mae'], optimizer=opt, loss_weights=[1,100])
 	return model
 
-# load and prepare training images
-def load_real_samples(filename):
-	# load compressed arrays
-	data = load(filename)
-	# unpack arrays
-	X1, X2 = data['arr_0'], data['arr_1']
-	# scale from [0,255] to [-1,1]
-	X1 = (X1 - 127.5) / 127.5
-	X2 = (X2 - 127.5) / 127.5
-	return [X1, X2]
 
-# load fashion mnist images
-def load_mnist_samples():
+def load_random_samples(shape=(1000, 256, 256, 3)):
 	# load dataset
-	(trainX, trainy), (_, _) = load_data()
-	# expand to 3d, e.g. add channels
-	X = expand_dims(trainX, axis=-1)
-	# convert from ints to floats
-	X = X.astype('float32')
-	# scale from [0,255] to [-1,1]
-	X = (X - 127.5) / 127.5
-	return [X, trainy]
+	trainy = np.random.default_rng().uniform(size=shape)
+	trainX = np.random.default_rng().uniform(size=shape)
+	
+	return [trainX, trainy]
 
 # select a batch of random samples, returns images and target
 def generate_real_samples(dataset, n_samples, patch_shape):
@@ -241,7 +224,7 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 		# update the generator
 		g_loss, _, _ = gan_model.train_on_batch(X_realA, [y_real, X_realB])
 		# summarize performance
-		print('>%d, d1[%.3f] d2[%.3f] g[%.3f]' % (i+1, d_loss1, d_loss2, g_loss))
+		print('>%d, d1 (real sample loss)[%.3f] d2 (generated sample loss)[%.3f] g[%.3f]' % (i+1, d_loss1, d_loss2, g_loss))
 		# summarize model performance
 		if (i+1) % (bat_per_epo * 10) == 0:
 			summarize_performance(i, g_model, dataset)
@@ -249,13 +232,13 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 
 def load_data_and_train(dataset=None):
 	# load image data
-	#dataset = load_real_samples('maps_256.npz')
 	if dataset is None:
-		dataset = load_mnist_samples()
+		dataset = load_random_samples()
 		
 	print('Loaded', dataset[0].shape, dataset[1].shape)
 	# define input shape based on the loaded dataset
 	image_shape = dataset[0].shape[1:]
+	print('Image shape: ', image_shape)
 	# define the models
 	d_model = define_discriminator(image_shape)
 	g_model = define_generator(image_shape)
@@ -263,3 +246,8 @@ def load_data_and_train(dataset=None):
 	gan_model = define_gan(g_model, d_model, image_shape)
 	# train model
 	train(d_model, g_model, gan_model, dataset)
+	return 0
+
+import sys
+if __name__ == "__main__":
+	sys.exit(load_data_and_train(None))
