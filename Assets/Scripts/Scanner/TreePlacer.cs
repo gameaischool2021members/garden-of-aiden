@@ -135,7 +135,7 @@ public class TreePlacer
 			{
 				if (!child.isVisited)
 				{
-					if (islandValue <= child.value)
+					if (islandValue == child.value)
 					{
 						queue.Enqueue(child);
 						notesInIsland.Add(child);
