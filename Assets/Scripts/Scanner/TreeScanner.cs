@@ -11,8 +11,6 @@ public class TreeScanner
 
     private float[,] texture;
     public const float scannerReach = 200f;
-    private Vector2 scanerCenterPoint = new Vector2(0f, 0f);
-
 
     public TreeScanner()
     {
@@ -31,12 +29,10 @@ public class TreeScanner
         //Reset for new use
         texture = new float[textureSizeX, textureSizeY];
 
-        this.scanerCenterPoint = scanerCenterPoint;
-
-        List<Vector2> trees = GetTreesInScannerReach();
+        List<Vector2> trees = GetTreesInScannerReach(scanerCenterPoint);
         foreach (Vector2 tree in trees)
         {
-            AddTreeToTexture(tree);
+            AddTreeToTexture(scanerCenterPoint, tree);
         }
 
         return texture;
@@ -46,7 +42,7 @@ public class TreeScanner
     //Private functions
 
     // Summery: Calles GetAllTreePositions() and FilterTreesOutOfScannerReach()
-    private List<Vector2> GetTreesInScannerReach()
+    private List<Vector2> GetTreesInScannerReach(Vector2 scanerCenterPoint)
     {
         return FilterTreesOutOfScannerReach(GetAllTreePositions(), scanerCenterPoint);
     }
@@ -93,7 +89,7 @@ public class TreeScanner
      * Summery: Maps the position of the tree within the scanner to the texture and makes a radiant around it
      * Takes:   World position of the three (x and y; in unity terms)
      */
-    private void AddTreeToTexture(Vector2 treePosition)
+    private void AddTreeToTexture(Vector2 scanerCenterPoint, Vector2 treePosition)
     {
         //Change to scanerCenter point of reffrence (hope its right aaaahhh)
         treePosition -= scanerCenterPoint;
@@ -101,7 +97,7 @@ public class TreeScanner
         Vector2 textureCoardinates;
         textureCoardinates.x = RemapValue(treePosition.x, -scannerReach, scannerReach, 0f, textureSizeX);
         textureCoardinates.y = RemapValue(treePosition.y, -scannerReach, scannerReach, 0f, textureSizeY);
-        Vector2Int textureTreeCoardinatesRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x));
+        Vector2Int textureTreeCoardinatesRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.y));
 
         //Crates gradiant and setes three position to 1 to be shure
         CreateGradiantArondTreeInTexture(textureTreeCoardinatesRounded);
