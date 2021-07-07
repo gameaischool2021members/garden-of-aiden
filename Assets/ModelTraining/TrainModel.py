@@ -2,6 +2,7 @@
 
 import sys
 import typing
+import numpy
 from argparse import *
 
 class TrainingInstance():
@@ -27,11 +28,33 @@ def collect_training_data() -> typing.List[TrainingInstance]:
     if 'finish'==line.rstrip():
       break
 
-    training_data += [parse_training_data(line)]
+    if 'begin_training_instance' == line.rstrip():
+      serialized_training_instance = []
+      for line in sys.stdin:
+        if 'end_training_instance'==line.rstrip():
+          break
+        serialized_training_instance += [line]
+
+      training_data += [parse_training_data(serialized_training_instance)]
 
   return training_data
 
-def parse_training_data(training_data_serialized : str) -> TrainingInstance:
+plants_prefix = 'plants'
+
+def parse_plants_data(input_stream) -> numpy.ndarray:
+  row_list = []
+  for line in input_stream.stdin:
+    if line.rstrip() == 'end':
+      break
+    row_list += [numpy.fromstring(line)]
+  return row_list
+
+def parse_training_data(training_data_serialized : List[str]) -> TrainingInstance:
+  # if not training_data_serialized.starts_with(plants_prefix):
+  #   throw 'missing prefix'
+
+  #plants_data_serialized = training_data_serialized[len(plants_prefix):]
+  numpy.fromstring(plants_data_serialized)
   return TrainingInstance()
 
 def train_on_data(training_data : typing.List[TrainingInstance]):

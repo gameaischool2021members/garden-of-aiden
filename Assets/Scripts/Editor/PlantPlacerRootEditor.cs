@@ -80,7 +80,7 @@ public class PlantPlacerRootEditor : Editor
         var centerPointMin = new Vector2(centerPointBounds.min.x, centerPointBounds.min.z);
         var centerPointMax = new Vector2(centerPointBounds.max.x, centerPointBounds.max.z);
 
-        for (var attemptIndex = 0; attemptIndex < 100; ++attemptIndex)
+        for (var attemptIndex = 0; attemptIndex < 1; ++attemptIndex)
         {
             var centerPoint = new Vector2(
                 UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),
@@ -91,13 +91,23 @@ public class PlantPlacerRootEditor : Editor
             var treeProximityMap = scanner.ScannForTrees(centerPoint).GetJagged();
 
             // send data to process
-            process.StandardInput.WriteLine("{" +
-                String.Join(",",
-                    treeProximityMap.Select(column =>
-                        "{" + String.Join(",", column) + "}"
-                    )
-                )
-            + "}");
+            process.StandardInput.WriteLine("plants");
+            foreach (var mapLine in treeProximityMap)
+            {
+                // process.StandardInput.WriteLine(String.Join(", ", mapLine));
+                process.StandardInput.WriteLine("0,0 0,0");
+                process.StandardInput.WriteLine("0,0 0,0");
+                process.StandardInput.WriteLine("0,0");
+                process.StandardInput.WriteLine("0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0,0");
+                process.StandardInput.WriteLine("0,0,0,0,0,0,0,0,0,0,0,0");
+            }
+            process.StandardInput.WriteLine("end");
         }
 
         process.StandardInput.WriteLine("finish");
