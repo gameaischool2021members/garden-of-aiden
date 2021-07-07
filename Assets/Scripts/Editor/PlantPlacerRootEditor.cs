@@ -18,15 +18,17 @@ public class PlantPlacerRootEditor : Editor
         if (GUILayout.Button("Start training"))
         {
             UnityEngine.Debug.LogFormat("Starting training");
-            var trainedModel = TrainModel(1f);
+            var trainedModel = TrainModel();
             SaveToModelAsset(trainedModel, TargetModel);
         }
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
     private const int modelTrainingTimeout = 5000;
-    private float TrainModel(float arbitraryInput)
+    private float TrainModel()
     {
+        var arbitraryInput = 1f;
+
         var startInfo = new ProcessStartInfo();
 
         startInfo.FileName = "python.exe";
