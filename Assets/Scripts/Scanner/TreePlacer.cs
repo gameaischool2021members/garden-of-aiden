@@ -12,6 +12,7 @@ public class TreePlacer
 	private decimal [,] decimalTexture;
 	//Used for the serach
 	private TexturePixelNode[,] textureNodes;
+	private bool[,] crossedOutPixels;
 
 	//Is this rigtht? Or do i rotate the texture here
 	private int textureSizeX;
@@ -31,12 +32,14 @@ public class TreePlacer
 		textureSizeY = texture.GetLength(1);
 
 		decimalTexture = new decimal[textureSizeX, textureSizeY];
+		crossedOutPixels = new bool[textureSizeX, textureSizeY];
 
 		for (int x = 0; x < textureSizeX; x++)
 		{
 			for (int y = 0; y < textureSizeY; y++)
 			{
 				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]);
+				crossedOutPixels[x, y] = false; //Just to make shure
 			}
 		}
 	}
@@ -61,7 +64,9 @@ public class TreePlacer
 		{
 			for (int y = 0; y < textureSizeY; y++)
 			{
-				if(0 < textureNodes[x, y].value)
+				//Maybe change here as well
+				//if (0 < textureNodes[x, y].value)
+				if (!crossedOutPixels[x, y]) 
                 {
 					treePositionsOnTexture.Add(FindTreeForPixel(textureNodes[x, y]));
 				}			
@@ -88,6 +93,7 @@ public class TreePlacer
         {
 			//YAY! We found a tree (i hope)
 			treePosition = AveragePoint(result.notesInIsland);
+			CrossOutLowNonTreePixels(result.notesInIsland);
 		}
 
 		return treePosition;
@@ -129,7 +135,7 @@ public class TreePlacer
 			{
 				if (!child.isVisited)
 				{
-					if (child.value == islandValue)
+					if (islandValue <= child.value)
 					{
 						queue.Enqueue(child);
 						notesInIsland.Add(child);
@@ -149,15 +155,13 @@ public class TreePlacer
 
 	private void CrossOutLowNonTreePixels(List<TexturePixelNode> pixels)
 	{
-
 		foreach (TexturePixelNode node in pixels)
 		{
-			decimalTexture[node.position.x, node.position.y] = -1;
-
+			//decimalTexture[node.position.x, node.position.y] = -1;
+			crossedOutPixels[node.position.x, node.position.y] = true;
 			//Do it for both to be shure but only use decimalTexture for the values and textureNodes for search
-			textureNodes[node.position.x, node.position.y].value = -1;
+			//textureNodes[node.position.x, node.position.y].value = -1;
 		}
-
 	}
 
 

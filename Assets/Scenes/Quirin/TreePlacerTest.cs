@@ -25,7 +25,7 @@ public class TreePlacerTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
         {
             Vector2 position = new Vector2(transform.position.x, transform.position.z);
-            texture = treeScanner.ScannForTrees(position, 50f, 25);
+            texture = treeScanner.ScannForTrees(position, 50f, 10);
             didScan = true;
 
             List<GameObject> trees = FilterTreesOutOfScannerReach(GetAllTrees(), position);
