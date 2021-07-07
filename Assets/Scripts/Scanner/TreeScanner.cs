@@ -7,10 +7,10 @@ public class TreeScanner
     //Should i just use one variable? 
     private int textureSizeX = 256;
     private int textureSizeY = 256;
-    private int textureGradiantRadius = 10;
+    private int textureGradiantRadius = 100;
 
     private float[,] texture;
-    public const float scannerReach = 10f;
+    public const float scannerReach = 200f;
     private Vector2 scanerCenterPoint = new Vector2(0f, 0f);
 
 
@@ -105,7 +105,15 @@ public class TreeScanner
 
         //Crates gradiant and setes three position to 1 to be shure
         CreateGradiantArondTreeInTexture(textureTreeCoardinatesRounded);
-        texture[Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x)] = 1f;
+
+        //Try to add the tree, but rounding might put the texture coordinates outside of the grid
+        var treePositionRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x));
+        if (   treePositionRounded.x >= 0 && treePositionRounded.x < textureSizeX
+            && treePositionRounded.y >= 0 && treePositionRounded.y < textureSizeY
+        )
+        {
+            texture[Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x)] = 1f;
+        }
     }
 
 
@@ -118,15 +126,15 @@ public class TreeScanner
      */
     private void CreateGradiantArondTreeInTexture(Vector2Int textureTreeCoardinatesRounded)
     {
-        for (int x = -textureGradiantRadius; x <= textureGradiantRadius; x++)
+        for (int x = textureTreeCoardinatesRounded.x - textureGradiantRadius; x <= textureTreeCoardinatesRounded.x + textureGradiantRadius; x++)
         {
             //Index out of bounds check
-            if (0 > x || x > textureSizeX) { continue; }
+            if (0 > x || x >= textureSizeX) { continue; }
 
-            for (int y = -textureGradiantRadius; y <= textureGradiantRadius; y++)
+            for (int y = textureTreeCoardinatesRounded.y - textureGradiantRadius; y <= textureTreeCoardinatesRounded.y + textureGradiantRadius; y++)
             {
                 //Index out of bounds check
-                if (0 > y || y > textureSizeY) { continue; }
+                if (0 > y || y >= textureSizeY) { continue; }
 
                 Vector2Int currentPixel = new Vector2Int(x, y);
                 float distanceToTree = Vector2Int.Distance(currentPixel, textureTreeCoardinatesRounded);
@@ -142,7 +150,6 @@ public class TreeScanner
                     {
                         texture[currentPixel.x, currentPixel.y] = textureValue;
                     }
-
                 }
             }
         }

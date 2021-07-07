@@ -63,9 +63,16 @@ public class PlantPlacerRootEditor : Editor
 
             Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             UnityEngine.Debug.LogErrorFormat("Error: {0}", e.Message);
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill();
+            }
         }
 
         var outputString = process.StandardOutput.ReadToEnd();
