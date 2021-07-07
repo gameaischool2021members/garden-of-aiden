@@ -148,13 +148,9 @@ def load_random_samples(shape=(1000, 64, 64, 3)):
 	return [trainX, trainy]
 
 # select a batch of random samples, returns images and target
-def generate_real_samples(dataset, n_samples, patch_shape, augmented=False):
+def generate_real_samples(dataset, n_samples, patch_shape):
 	# unpack dataset
 	trainA, trainB = dataset
-	# 
-	if (augmented):
-		trainA, trainB = next(augment_data(dataset, batch_size=dataset[0].shape[0]))
-
 	# choose random instances
 	ix = randint(0, trainA.shape[0], n_samples)
 	# retrieve selected images
@@ -212,8 +208,13 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1, augmented=False):
 	# determine the output square shape of the discriminator
 	n_patch = d_model.output_shape[1]
+
+	if (augmented):
+		dataset = next(augment_data(dataset, batch_size=dataset[0].shape[0] * 2))
+
 	# unpack dataset
 	trainA, trainB = dataset
+
 	# calculate the number of batches per training epoch
 	bat_per_epo = int(len(trainA) / n_batch)
 	# calculate the number of training iterations
@@ -221,7 +222,7 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1, augment
 	# manually enumerate epochs
 	for i in range(n_steps):
 		# select a batch of real samples
-		[X_realA, X_realB], y_real = generate_real_samples(dataset, n_batch, n_patch, augmented=augmented)
+		[X_realA, X_realB], y_real = generate_real_samples(dataset, n_batch, n_patch)
 		# generate a batch of fake samples
 		X_fakeB, y_fake = generate_fake_samples(g_model, X_realA, n_patch)
 		# update discriminator for real samples
