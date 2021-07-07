@@ -60,7 +60,7 @@ public class TreeScanner
         GameObject[] trees = GameObject.FindGameObjectsWithTag("Trees");
         foreach (GameObject tree in trees)
         {
-            Vector2 treePos = new Vector2(tree.transform.position.x, tree.transform.position.y);
+            Vector2 treePos = new Vector2(tree.transform.position.x, tree.transform.position.z);
             treePositions.Add(treePos);
         }
 
