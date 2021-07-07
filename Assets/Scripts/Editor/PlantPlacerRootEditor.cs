@@ -74,6 +74,8 @@ public class PlantPlacerRootEditor : Editor
         return output;
     }
 
+    private const int heightMapResolution = 256;
+
     private void CollectAndSendTrainingDataToTrainer(Process process)
     {
         var scanner = new TreeScanner();
@@ -94,20 +96,43 @@ public class PlantPlacerRootEditor : Editor
             );
 
             // collect data
-            var treeProximityMap = scanner.ScannForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels).GetJagged();
+            var treeProximityMap = scanner.ScannForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
+
+            var heightMap = new float[heightMapResolution, heightMapResolution];
+            var cornerOrigin2d = centerPoint - Vector2.one * TargetComponent.tileWidthInWorldUnits / 2f;
+            var cornerOrigin = Vector3.right * cornerOrigin2d.x + Vector3.forward * cornerOrigin2d.y;
+            for (var x = 0; x < heightMapResolution; ++x)
+            {
+                for (var y = 0; y < heightMapResolution; ++y)
+                {
+                    var offset = (Vector3.right * x + Vector3.forward * y) * TargetComponent.tileWidthInWorldUnits / heightMapResolution;
+                    var pollPosition = cornerOrigin + offset;
+                    heightMap[x,y] = terrain.SampleHeight(pollPosition);
+                }
+            }
 
             // send data to process
 
             stdInput.WriteLine("begin_training_instance");
+
             stdInput.WriteLine("plants");
-            foreach (var mapLine in treeProximityMap)
-            {
-                stdInput.WriteLine(String.Join(" ", mapLine));
-            }
+            WriteMap(treeProximityMap, stdInput);
+
+            stdInput.WriteLine("heights");
+            WriteMap(heightMap, stdInput);
+
             stdInput.WriteLine("end_training_instance");
         }
 
         stdInput.WriteLine("finish");
+    }
+
+    private static void WriteMap(float[,] input, StreamWriter output)
+    {
+        foreach (var mapLine in input.GetJagged())
+        {
+            output.WriteLine(String.Join(" ", mapLine));
+        }
     }
 
     private static void DoIfAnyNonEmptyStrings(String output, Action<String> action)

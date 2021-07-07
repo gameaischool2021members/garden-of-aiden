@@ -50,6 +50,8 @@ def DEBUG_plot_first_instance(training_data):
   training_instance = training_data[0]
   plt.imshow(training_instance.plant_data, cmap='hot')
   plt.show()
+  plt.imshow(training_instance.height_data, cmap='hot')
+  plt.show()
 
 plants_prefix = 'plants'
 
