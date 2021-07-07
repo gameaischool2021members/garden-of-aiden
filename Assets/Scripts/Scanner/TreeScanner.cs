@@ -5,9 +5,9 @@ using UnityEngine;
 public class TreeScanner
 {
     //Should i just use one variable? 
-    private int textureSizeX = 256;
-    private int textureSizeY = 256;
-    private int textureGradiantRadius = 100;
+    private const int textureSizeX = 256;
+    private const int textureSizeY = 256;
+    private int textureGradiantRadius = 25;
 
     private float[,] texture;
     public const float scannerReach = 200f;
