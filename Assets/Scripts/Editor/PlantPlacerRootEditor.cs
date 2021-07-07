@@ -15,25 +15,17 @@ public class PlantPlacerRootEditor : Editor
     {
         base.DrawDefaultInspector();
 
-        debugModelValue = EditorGUILayout.FloatField("DEBUG Model value", debugModelValue);
-
         if (GUILayout.Button("Start training"))
         {
             UnityEngine.Debug.LogFormat("Starting training");
-            var trainedModel = TrainModel(debugModelValue);
+            var trainedModel = TrainModel();
             SaveToModelAsset(trainedModel, TargetModel);
-        }
-
-        EditorGUILayout.HelpBox("The following controls have not been implemented yet", MessageType.Info, wide:true);
-        using (new EditorGUI.DisabledScope(true))
-        {
-            EditorGUILayout.Toggle("Orientation invariant", false);
         }
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
-    private const int modelTrainingTimeout = 30000;
-    private float TrainModel(float arbitraryInput)
+    private const int modelTrainingTimeout = 5000;
+    private float TrainModel()
     {
         var startInfo = new ProcessStartInfo();
 
@@ -41,8 +33,6 @@ public class PlantPlacerRootEditor : Editor
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
-            "--",
-            arbitraryInput.ToString(),
         }.Select(arg => String.Format("\"{0}\"", arg)));
         UnityEngine.Debug.LogFormat("Running python script {0} - {1}", fullPathToPython, startInfo.Arguments);
 
@@ -55,11 +45,25 @@ public class PlantPlacerRootEditor : Editor
         process.StartInfo = startInfo;
         process.Start();
 
-        CollectAndSendTrainingDataToTrainer(process);
+        try
+        {
+            CollectAndSendTrainingDataToTrainer(process);
 
-        var hasClosed = process.WaitForExit(modelTrainingTimeout);
+            var hasClosed = process.WaitForExit(modelTrainingTimeout);
 
-        Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+            Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+        }
+        catch (IOException e)
+        {
+            UnityEngine.Debug.LogErrorFormat("Error: {0}", e.Message);
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill();
+            }
+        }
 
         var outputString = process.StandardOutput.ReadToEnd();
 
@@ -70,17 +74,21 @@ public class PlantPlacerRootEditor : Editor
         return output;
     }
 
+    private const int heightMapResolution = 256;
+
     private void CollectAndSendTrainingDataToTrainer(Process process)
     {
         var scanner = new TreeScanner();
 
         var terrain = TargetComponent.GetComponent<Terrain>();
         var centerPointBounds = terrain.terrainData.bounds;
-        centerPointBounds.Expand((Vector3.right + Vector3.forward) * -TreeScanner.scannerReach);
+        centerPointBounds.Expand((Vector3.right + Vector3.forward) * -TargetComponent.tileWidthInWorldUnits / 2f);
         var centerPointMin = new Vector2(centerPointBounds.min.x, centerPointBounds.min.z);
         var centerPointMax = new Vector2(centerPointBounds.max.x, centerPointBounds.max.z);
 
-        for (var attemptIndex = 0; attemptIndex < 100; ++attemptIndex)
+        var stdInput = process.StandardInput;
+
+        for (var attemptIndex = 0; attemptIndex < 1; ++attemptIndex)
         {
             var centerPoint = new Vector2(
                 UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),
@@ -88,19 +96,43 @@ public class PlantPlacerRootEditor : Editor
             );
 
             // collect data
-            var treeProximityMap = scanner.ScannForTrees(centerPoint).GetJagged();
+            var treeProximityMap = scanner.ScannForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
+
+            var heightMap = new float[heightMapResolution, heightMapResolution];
+            var cornerOrigin2d = centerPoint - Vector2.one * TargetComponent.tileWidthInWorldUnits / 2f;
+            var cornerOrigin = Vector3.right * cornerOrigin2d.x + Vector3.forward * cornerOrigin2d.y;
+            for (var x = 0; x < heightMapResolution; ++x)
+            {
+                for (var y = 0; y < heightMapResolution; ++y)
+                {
+                    var offset = (Vector3.right * x + Vector3.forward * y) * TargetComponent.tileWidthInWorldUnits / heightMapResolution;
+                    var pollPosition = cornerOrigin + offset;
+                    heightMap[x,y] = terrain.SampleHeight(pollPosition);
+                }
+            }
 
             // send data to process
-            process.StandardInput.WriteLine("{" +
-                String.Join(",",
-                    treeProximityMap.Select(column =>
-                        "{" + String.Join(",", column) + "}"
-                    )
-                )
-            + "}");
+
+            stdInput.WriteLine("begin_training_instance");
+
+            stdInput.WriteLine("plants");
+            WriteMap(treeProximityMap, stdInput);
+
+            stdInput.WriteLine("heights");
+            WriteMap(heightMap, stdInput);
+
+            stdInput.WriteLine("end_training_instance");
         }
 
-        process.StandardInput.WriteLine("finish");
+        stdInput.WriteLine("finish");
+    }
+
+    private static void WriteMap(float[,] input, StreamWriter output)
+    {
+        foreach (var mapLine in input.GetJagged())
+        {
+            output.WriteLine(String.Join(" ", mapLine));
+        }
     }
 
     private static void DoIfAnyNonEmptyStrings(String output, Action<String> action)
@@ -147,6 +179,4 @@ public class PlantPlacerRootEditor : Editor
         (PlantPlacerRoot)serializedObject.targetObject;
     private PlantPlacerModel TargetModel => 
         (PlantPlacerModel)serializedObject.FindProperty(PlantPlacerRoot.modelPropertyName).objectReferenceValue;
-    
-    private float debugModelValue = 1f;
 }

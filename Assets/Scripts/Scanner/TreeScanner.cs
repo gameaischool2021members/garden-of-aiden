@@ -5,14 +5,10 @@ using UnityEngine;
 public class TreeScanner
 {
     //Should i just use one variable? 
-    private int textureSizeX = 256;
-    private int textureSizeY = 256;
-    private int textureGradiantRadius = 10;
+    private const int textureSizeX = 256;
+    private const int textureSizeY = 256;
 
     private float[,] texture;
-    public const float scannerReach = 10f;
-    private Vector2 scanerCenterPoint = new Vector2(0f, 0f);
-
 
     public TreeScanner()
     {
@@ -26,17 +22,15 @@ public class TreeScanner
      * Takes:   The position
      * Returns: The texture as a 2D Array with values between 0 and 1
      */
-    public float[,] ScannForTrees(Vector2 scanerCenterPoint)
+    public float[,] ScannForTrees(Vector2 scanerCenterPoint, float scannerReach, int textureGradiantRadius)
     {
         //Reset for new use
         texture = new float[textureSizeX, textureSizeY];
 
-        this.scanerCenterPoint = scanerCenterPoint;
-
-        List<Vector2> trees = GetTreesInScannerReach();
+        List<Vector2> trees = GetTreesInScannerReach(scanerCenterPoint, scannerReach);
         foreach (Vector2 tree in trees)
         {
-            AddTreeToTexture(tree);
+            AddTreeToTexture(scanerCenterPoint, tree, scannerReach, textureGradiantRadius);
         }
 
         return texture;
@@ -46,9 +40,9 @@ public class TreeScanner
     //Private functions
 
     // Summery: Calles GetAllTreePositions() and FilterTreesOutOfScannerReach()
-    private List<Vector2> GetTreesInScannerReach()
+    private List<Vector2> GetTreesInScannerReach(Vector2 scanerCenterPoint, float scannerReach)
     {
-        return FilterTreesOutOfScannerReach(GetAllTreePositions(), scanerCenterPoint);
+        return FilterTreesOutOfScannerReach(GetAllTreePositions(), scannerReach, scanerCenterPoint);
     }
 
 
@@ -60,7 +54,7 @@ public class TreeScanner
         GameObject[] trees = GameObject.FindGameObjectsWithTag("Trees");
         foreach (GameObject tree in trees)
         {
-            Vector2 treePos = new Vector2(tree.transform.position.x, tree.transform.position.y);
+            Vector2 treePos = new Vector2(tree.transform.position.x, tree.transform.position.z);
             treePositions.Add(treePos);
         }
 
@@ -73,7 +67,7 @@ public class TreeScanner
     * Takes:   All tree x,y coordinates, and the centerPoint of the scanner
     * Returns: A New list with only tree coordinates within the scanner range
     */
-    private List<Vector2> FilterTreesOutOfScannerReach(List<Vector2> treePositions, Vector2 scanerCenterPoint)
+    private List<Vector2> FilterTreesOutOfScannerReach(List<Vector2> treePositions, float scannerReach, Vector2 scanerCenterPoint)
     {
         List<Vector2> treesInScannerReach = new List<Vector2>();
 
@@ -93,7 +87,7 @@ public class TreeScanner
      * Summery: Maps the position of the tree within the scanner to the texture and makes a radiant around it
      * Takes:   World position of the three (x and y; in unity terms)
      */
-    private void AddTreeToTexture(Vector2 treePosition)
+    private void AddTreeToTexture(Vector2 scanerCenterPoint, Vector2 treePosition, float scannerReach, int textureGradiantRadius)
     {
         //Change to scanerCenter point of reffrence (hope its right aaaahhh)
         treePosition -= scanerCenterPoint;
@@ -101,11 +95,10 @@ public class TreeScanner
         Vector2 textureCoardinates;
         textureCoardinates.x = RemapValue(treePosition.x, -scannerReach, scannerReach, 0f, textureSizeX);
         textureCoardinates.y = RemapValue(treePosition.y, -scannerReach, scannerReach, 0f, textureSizeY);
-        Vector2Int textureTreeCoardinatesRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x));
+        Vector2Int textureTreeCoardinatesRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.y));
 
         //Crates gradiant and setes three position to 1 to be shure
-        CreateGradiantArondTreeInTexture(textureTreeCoardinatesRounded);
-        texture[Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.x)] = 1f;
+        CreateGradiantArondTreeInTexture(textureTreeCoardinatesRounded, textureGradiantRadius);
     }
 
 
@@ -116,17 +109,17 @@ public class TreeScanner
      *          checks the distance from each pixel form center
      *          sets value of pixel accordingly
      */
-    private void CreateGradiantArondTreeInTexture(Vector2Int textureTreeCoardinatesRounded)
+    private void CreateGradiantArondTreeInTexture(Vector2Int textureTreeCoardinatesRounded, int textureGradiantRadius)
     {
-        for (int x = -textureGradiantRadius; x <= textureGradiantRadius; x++)
+        for (int x = textureTreeCoardinatesRounded.x - textureGradiantRadius; x <= textureTreeCoardinatesRounded.x + textureGradiantRadius; x++)
         {
             //Index out of bounds check
-            if (0 > x || x > textureSizeX) { continue; }
+            if (0 > x || x >= textureSizeX) { continue; }
 
-            for (int y = -textureGradiantRadius; y <= textureGradiantRadius; y++)
+            for (int y = textureTreeCoardinatesRounded.y - textureGradiantRadius; y <= textureTreeCoardinatesRounded.y + textureGradiantRadius; y++)
             {
                 //Index out of bounds check
-                if (0 > y || y > textureSizeY) { continue; }
+                if (0 > y || y >= textureSizeY) { continue; }
 
                 Vector2Int currentPixel = new Vector2Int(x, y);
                 float distanceToTree = Vector2Int.Distance(currentPixel, textureTreeCoardinatesRounded);
@@ -142,7 +135,6 @@ public class TreeScanner
                     {
                         texture[currentPixel.x, currentPixel.y] = textureValue;
                     }
-
                 }
             }
         }
