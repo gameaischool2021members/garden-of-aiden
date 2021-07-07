@@ -12,7 +12,7 @@ public class TreeParticles : MonoBehaviour
 
     void Awake()
     {
-        GameObject startingDust = GameObject.Instantiate(dust);
+        GameObject startingDust = GameObject.Instantiate(dust, transform.position, dust.transform.rotation);
         dustParticles = startingDust.GetComponent<ParticleSystem>();
     }
 
@@ -30,7 +30,7 @@ public class TreeParticles : MonoBehaviour
 
     void OnDestroy()
     {
-        GameObject endLeaves = GameObject.Instantiate(leaves);
+        GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 1.5f, 0), leaves.transform.rotation);
         leavesParticles = endLeaves.GetComponentInChildren<ParticleSystem>();
         leavesParticles.Play();
     }
