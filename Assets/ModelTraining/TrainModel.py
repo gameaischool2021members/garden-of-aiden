@@ -40,13 +40,16 @@ def collect_training_data() -> List[TrainingInstance]:
 
       training_instance = parse_training_data(serialized_training_instance)
 
-      plt.imshow(training_instance.data, cmap='hot')
-      # plt.imshow(numpy.zeros([100,100]), cmap='hot')
-      plt.show()
-
       training_data += [training_instance]
 
+  DEBUG_plot_first_instance(training_data)
+
   return training_data
+
+def DEBUG_plot_first_instance(training_data):
+  training_instance = training_data[0]
+  plt.imshow(training_instance.data, cmap='hot')
+  plt.show()
 
 plants_prefix = 'plants'
 

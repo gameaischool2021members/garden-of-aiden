@@ -6,7 +6,13 @@ public class PlantPlacerRoot : MonoBehaviour
 {
 #pragma warning disable 0414
     [SerializeField]
-    private PlantPlacerModel model = null;
+    public PlantPlacerModel model = null;
     public const string modelPropertyName = nameof(model);
 #pragma warning restore 0414
+
+    [SerializeField]
+    public float tileWidthInWorldUnits = 10f;
+
+    [SerializeField]
+    public int proximityGradientWidthInTexels = 25;
 }

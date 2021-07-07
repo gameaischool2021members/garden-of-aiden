@@ -15,19 +15,11 @@ public class PlantPlacerRootEditor : Editor
     {
         base.DrawDefaultInspector();
 
-        debugModelValue = EditorGUILayout.FloatField("DEBUG Model value", debugModelValue);
-
         if (GUILayout.Button("Start training"))
         {
             UnityEngine.Debug.LogFormat("Starting training");
-            var trainedModel = TrainModel(debugModelValue);
+            var trainedModel = TrainModel(1f);
             SaveToModelAsset(trainedModel, TargetModel);
-        }
-
-        EditorGUILayout.HelpBox("The following controls have not been implemented yet", MessageType.Info, wide:true);
-        using (new EditorGUI.DisabledScope(true))
-        {
-            EditorGUILayout.Toggle("Orientation invariant", false);
         }
     }
 
@@ -90,7 +82,7 @@ public class PlantPlacerRootEditor : Editor
 
         var terrain = TargetComponent.GetComponent<Terrain>();
         var centerPointBounds = terrain.terrainData.bounds;
-        centerPointBounds.Expand((Vector3.right + Vector3.forward) * -TreeScanner.scannerReach);
+        centerPointBounds.Expand((Vector3.right + Vector3.forward) * -TargetComponent.tileWidthInWorldUnits / 2f);
         var centerPointMin = new Vector2(centerPointBounds.min.x, centerPointBounds.min.z);
         var centerPointMax = new Vector2(centerPointBounds.max.x, centerPointBounds.max.z);
 
@@ -104,7 +96,7 @@ public class PlantPlacerRootEditor : Editor
             );
 
             // collect data
-            var treeProximityMap = scanner.ScannForTrees(centerPoint).GetJagged();
+            var treeProximityMap = scanner.ScannForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels).GetJagged();
 
             // send data to process
 
@@ -163,6 +155,4 @@ public class PlantPlacerRootEditor : Editor
         (PlantPlacerRoot)serializedObject.targetObject;
     private PlantPlacerModel TargetModel => 
         (PlantPlacerModel)serializedObject.FindProperty(PlantPlacerRoot.modelPropertyName).objectReferenceValue;
-    
-    private float debugModelValue = 1f;
 }
