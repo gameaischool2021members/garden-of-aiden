@@ -27,8 +27,6 @@ public class PlantPlacerRootEditor : Editor
     private const int modelTrainingTimeout = 5000;
     private float TrainModel()
     {
-        var arbitraryInput = 1f;
-
         var startInfo = new ProcessStartInfo();
 
         startInfo.FileName = "python.exe";
@@ -36,7 +34,6 @@ public class PlantPlacerRootEditor : Editor
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
             "--",
-            arbitraryInput.ToString(),
         }.Select(arg => String.Format("\"{0}\"", arg)));
         UnityEngine.Debug.LogFormat("Running python script {0} - {1}", fullPathToPython, startInfo.Arguments);
 

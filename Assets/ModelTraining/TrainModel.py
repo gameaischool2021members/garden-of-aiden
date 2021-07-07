@@ -14,7 +14,6 @@ class TrainingInstance():
 
 def main():
   parser = ArgumentParser(description='Turn landscape and veg proximity maps into a trained model')
-  parser.add_argument('value', type=float)
   args = parser.parse_args()
 
   training_data = collect_training_data()
@@ -42,7 +41,7 @@ def collect_training_data() -> List[TrainingInstance]:
 
       training_data += [training_instance]
 
-  DEBUG_plot_first_instance(training_data)
+  # DEBUG_plot_first_instance(training_data)
 
   return training_data
 
