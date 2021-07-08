@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class TreePlacerTest : MonoBehaviour
 {
+    public Terrain terrain;
     private TreeScanner treeScanner;
     private TreePlacer treePlacer;
     private bool didScan = false;
     private float[,] texture;
+    private float scannerReach = 50f;
 
     [SerializeField]
     private GameObject treePrefab;
@@ -25,13 +27,14 @@ public class TreePlacerTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
         {
             Vector2 position = new Vector2(transform.position.x, transform.position.z);
-            texture = treeScanner.ScannForTrees(position, 50f, 25);
+            texture = treeScanner.ScanForTrees(position, scannerReach, 25);
             didScan = true;
 
             List<GameObject> trees = FilterTreesOutOfScannerReach(GetAllTrees(), position);
 
             foreach (GameObject tree in trees)
             {
+                Debug.Log("X: " + tree.transform.position.x + " Y: " + tree.transform.position.z);
                 Destroy(tree);
             }
         }
@@ -40,14 +43,19 @@ public class TreePlacerTest : MonoBehaviour
         {
             if (didScan)
             {
-                List<Vector2Int> treePositons = treePlacer.GetTreePositionsInOnTexture(texture);
-                Debug.Log("Nummber spawned Trees: " + treePositons.Count);
+                // List<Vector2Int> treePositions = treePlacer.GetTreePositionsInTexture(texture);
+                Vector2 scannerPosition = new Vector2(transform.position.x, transform.position.z);
+                List<Vector2> treePositions = treePlacer.GetTreePositionsInWorld(texture, scannerReach, scannerPosition);
+                Debug.Log("Number of spawned Trees: " + treePositions.Count);
 
-                foreach (Vector2Int tree in treePositons)
+                foreach (Vector2 treePosition2D in treePositions)
                 {
-                   // Debug.Log("X: " + tree.x + " Y: " + tree.y);
-
-                    Instantiate(treePrefab);
+                    Debug.Log("X: " + treePosition2D.x + " Y: " + treePosition2D.y);
+                    // To find the elevation, SampleHeight function of the terrain is used
+                    Vector3 sampleHeightInput = new Vector3(treePosition2D.x, 0, treePosition2D.y);
+                    Vector3 treePosition = new Vector3(treePosition2D.x, terrain.SampleHeight(sampleHeightInput),
+                        treePosition2D.y);
+                    Instantiate(treePrefab, treePosition, Quaternion.identity);
                 }
             }
         }

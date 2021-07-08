@@ -116,7 +116,7 @@ public class PlantPlacerRootEditor : Editor
             );
 
             // collect data
-            var treeProximityMap = scanner.ScannForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
+            var treeProximityMap = scanner.ScanForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
 
             var heightMap = new float[heightMapResolution, heightMapResolution];
             var cornerOrigin2d = centerPoint - Vector2.one * TargetComponent.tileWidthInWorldUnits / 2f;

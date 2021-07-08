@@ -40,9 +40,9 @@ public class TreeParticles : MonoBehaviour
         return treeMaterials[0].color;
     }
 
-    void DestroyTree()
+    public void DestroyTree()
     {
-        GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 1.5f, 0), leaves.transform.rotation);
+        GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 21.5f, 0), leaves.transform.rotation);
         leavesParticles = endLeaves.GetComponentInChildren<ParticleSystem>();
 
         var main = leavesParticles.main;
@@ -50,13 +50,15 @@ public class TreeParticles : MonoBehaviour
         main.startColor = new Color(treeColor.r, treeColor.g, treeColor.b, treeColor.a);
 
         leavesParticles.Play();
+
+        //Destoy this gameobject here
     }
 
-    /* OnDestroy gets also called on scene closing so it spawns leafs in to the editor scene that dont even show up it the scene hirachy bc unity is wierd
-     * so int short it  clutters the scene
+     /*OnDestroy gets also called on scene closing so it spawns leafs in to the editor scene that dont even show up it the scene hirachy bc unity is wierd
+      so int short it  clutters the scene
     void OnDestroy()
     {
-        GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 1.5f, 0), leaves.transform.rotation);
+        GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 21.5f, 0), leaves.transform.rotation);
         leavesParticles = endLeaves.GetComponentInChildren<ParticleSystem>();
 
         var main = leavesParticles.main;

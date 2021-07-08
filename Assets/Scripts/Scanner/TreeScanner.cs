@@ -21,16 +21,16 @@ public class TreeScanner
      * Takes:   The position
      * Returns: The texture as a 2D Array with values between 0 and 1
      */
-    public float[,] ScannForTrees(Vector2 scanerCenterPoint, float scannerReach, int textureGradiantRadius)
+    public float[,] ScanForTrees(Vector2 scannerCenterPoint, float scannerReach, int textureGradiantRadius)
     {
         //Reset for new use
         texture = new float[textureSizeX, textureSizeY];
 
-        List<Vector2> trees = GetTreesInScannerReach(scanerCenterPoint, scannerReach);
-        Debug.Log("Nummber of scanned trees: " + trees.Count);
+        List<Vector2> trees = GetTreesInScannerReach(scannerCenterPoint, scannerReach);
+        Debug.Log("Number of scanned trees: " + trees.Count);
         foreach (Vector2 tree in trees)
         {
-            AddTreeToTexture(scanerCenterPoint, tree, scannerReach, textureGradiantRadius);
+            AddTreeToTexture(scannerCenterPoint, tree, scannerReach, textureGradiantRadius);
         }
 
         return texture;
@@ -40,9 +40,9 @@ public class TreeScanner
     //Private functions
 
     // Summery: Calles GetAllTreePositions() and FilterTreesOutOfScannerReach()
-    private List<Vector2> GetTreesInScannerReach(Vector2 scanerCenterPoint, float scannerReach)
+    private List<Vector2> GetTreesInScannerReach(Vector2 scannerCenterPoint, float scannerReach)
     {
-        return FilterTreesOutOfScannerReach(GetAllTreePositions(), scannerReach, scanerCenterPoint);
+        return FilterTreesOutOfScannerReach(GetAllTreePositions(), scannerReach, scannerCenterPoint);
     }
 
 
@@ -98,7 +98,7 @@ public class TreeScanner
         Vector2Int textureTreeCoardinatesRounded = new Vector2Int(Mathf.RoundToInt(textureCoardinates.x), Mathf.RoundToInt(textureCoardinates.y));
 
         //Crates gradiant and setes three position to 1 to be shure
-        CreateGradiantArondTreeInTexture(textureTreeCoardinatesRounded, textureGradiantRadius);
+        CreateGradiantAroundTreeInTexture(textureTreeCoardinatesRounded, textureGradiantRadius);
     }
 
 
@@ -109,24 +109,24 @@ public class TreeScanner
      *          checks the distance from each pixel form center
      *          sets value of pixel accordingly
      */
-    private void CreateGradiantArondTreeInTexture(Vector2Int textureTreeCoardinatesRounded, int textureGradiantRadius)
+    private void CreateGradiantAroundTreeInTexture(Vector2Int textureTreeCoordinatesRounded, int textureGradiantRadius)
     {
-        for (int x = textureTreeCoardinatesRounded.x - textureGradiantRadius; x <= textureTreeCoardinatesRounded.x + textureGradiantRadius; x++)
+        for (int x = textureTreeCoordinatesRounded.x - textureGradiantRadius; x <= textureTreeCoordinatesRounded.x + textureGradiantRadius; x++)
         {
             //Index out of bounds check
             if (0 > x || x >= textureSizeX) { continue; }
 
-            for (int y = textureTreeCoardinatesRounded.y - textureGradiantRadius; y <= textureTreeCoardinatesRounded.y + textureGradiantRadius; y++)
+            for (int y = textureTreeCoordinatesRounded.y - textureGradiantRadius; y <= textureTreeCoordinatesRounded.y + textureGradiantRadius; y++)
             {
                 //Index out of bounds check
                 if (0 > y || y >= textureSizeY) { continue; }
 
                 Vector2Int currentPixel = new Vector2Int(x, y);
-                float distanceToTree = Vector2Int.Distance(currentPixel, textureTreeCoardinatesRounded);
+                float distanceToTree = Vector2Int.Distance(currentPixel, textureTreeCoordinatesRounded);
                 distanceToTree = Mathf.Abs(distanceToTree); //just to be shure
                 if (distanceToTree < textureGradiantRadius)
                 {
-                    //Callculate pixel intensety (inversed here, pixel with the most distance has value 1.0f)
+                    //Calculate pixel intensity (inversed here, pixel with the most distance has value 1.0f)
                     float textureValue = RemapValue(distanceToTree, 0f, textureGradiantRadius, 0f, 1.0f);
                     textureValue = 1 - textureValue;
 
@@ -143,8 +143,8 @@ public class TreeScanner
 
     /* 
      * Summery: Takes a value within a range and returns a value at the same percentage point at onther range
-     * Returns: Maped value
-     * Misc:    Whatch our for 0 divisons !!!!
+     * Returns: Mapped value
+     * Misc:    Watch out for 0 divisions !!!!
      * Example: RemapValue(6,   0, 10,   0, 50) returns 30
      *          Maps value in range 0 to 10 to value in range 0 to 50
      */
