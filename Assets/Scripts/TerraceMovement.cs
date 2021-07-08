@@ -7,6 +7,8 @@ public class TerraceMovement : MonoBehaviour
 {
     public Terrain terrain;
 
+    public float heightChange = 1.1f;
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,7 +49,7 @@ public class TerraceMovement : MonoBehaviour
                 }
                 else
                 {
-                    heights[hitPointTerZ, hitPointTerX] = heights[hitPointTerZ, hitPointTerX] * 5.05f; //the 5.05f parameter is the high of each click
+                    heights[hitPointTerZ, hitPointTerX] = heights[hitPointTerZ, hitPointTerX] * heightChange;
                 }
 
                 terrain.terrainData.SetHeights(0, 0, heights);
