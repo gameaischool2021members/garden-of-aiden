@@ -40,6 +40,8 @@ public class PlantPlacerRuntime : MonoBehaviour
     {
         StartCoroutine(RegenerateTiles());
         StartCoroutine(PlaceTrees());
+
+        OnLandscapeUpdated(Vector2Int.zero);
     }
 
     private IEnumerator RegenerateTiles()

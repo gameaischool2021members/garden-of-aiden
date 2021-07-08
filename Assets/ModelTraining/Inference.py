@@ -7,7 +7,9 @@ def main():
     parser.add_argument('--model', help='The path to the .h5 stored model', required=True, type=str)
     parser.parse_args()
 
+    print('hi first')
     model = Model.ModelRunner(parser.model)
+    print('hi')
     model.listen()
 
 if __name__ == '__main':

@@ -22,13 +22,25 @@ public class PlantPlacerPythonRunner
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "Inference.py");
+
+    // uncomment the one you want
+
+    // Sam
     public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
+
+    // Anthony
+    // public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
+
+    public static readonly string relativeModelPath = "first_training_pass.h5";
     private void StartProcess()
     {
         var startInfo = new ProcessStartInfo(testPathToPython);
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
+        var fullPathToModel = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativeModelPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
+            "--",
+            "--model", fullPathToModel,
         }.Select(arg => String.Format("\"{0}\"", arg)));
         startInfo.RedirectStandardInput = true;
 
