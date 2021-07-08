@@ -5,19 +5,25 @@ using UnityEngine;
 public class TreePlacerTest : MonoBehaviour
 {
     public Terrain terrain;
-    private TreeScanner treeScanner;
-    private TreePlacer treePlacer;
-    private bool didScan = false;
-    private float[,] texture;
+    private VegetationScanner vegetationScanner;
+    private VegetationPlacer treePlacer;
+    private VegetationPlacer bushPlacer;
+    private bool didScanTrees = false;
+    private bool didScanBushes = false;
+    private float[,] treeTexture;
+    private float[,] bushTexture;
     private float scannerReach = 50f;
 
     [SerializeField]
     private GameObject treePrefab;
+    [SerializeField]
+    private GameObject bushPrefab;
 
     private void Awake()
     {
-        treeScanner = new TreeScanner();
-        treePlacer = new TreePlacer();
+        vegetationScanner = new VegetationScanner();
+        treePlacer = new VegetationPlacer();
+        bushPlacer = new VegetationPlacer();
     }
 
 
@@ -27,10 +33,12 @@ public class TreePlacerTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
         {
             Vector2 position = new Vector2(transform.position.x, transform.position.z);
-            texture = treeScanner.ScanForTrees(position, scannerReach, 25);
-            didScan = true;
+            
+            // Scanning the Trees
+            treeTexture = vegetationScanner.ScanForTrees(position, scannerReach, 25);
+            didScanTrees = true;
 
-            List<GameObject> trees = FilterTreesOutOfScannerReach(GetAllTrees(), position);
+            List<GameObject> trees = FilterVegetationOutOfScannerReach(GetAllTrees(), position);
 
             foreach (GameObject tree in trees)
             {
@@ -42,15 +50,31 @@ public class TreePlacerTest : MonoBehaviour
                 Debug.Log("X: " + tree.transform.position.x + " Y: " + tree.transform.position.z);
                 Destroy(tree);
             }
+            
+            // Scanning the bushes
+            bushTexture = vegetationScanner.ScanForBushes(position, scannerReach, 25);
+            didScanBushes = true;
+
+            List<GameObject> bushes = FilterVegetationOutOfScannerReach(GetAllBushes(), position);
+
+            foreach (GameObject bush in bushes)
+            {
+                // TreeParticles particles = bush.GetComponent<TreeParticles>();
+                // if(particles != null)
+                // {
+                //     particles.DestroyTree();
+                // }
+                Debug.Log("X: " + bush.transform.position.x + " Y: " + bush.transform.position.z);
+                Destroy(bush);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-            if (didScan)
+            if (didScanTrees)
             {
-                // List<Vector2Int> treePositions = treePlacer.GetTreePositionsInTexture(texture);
                 Vector2 scannerPosition = new Vector2(transform.position.x, transform.position.z);
-                List<Vector2> treePositions = treePlacer.GetTreePositionsInWorld(texture, scannerReach, scannerPosition);
+                List<Vector2> treePositions = treePlacer.GetVegetationPositionsInWorld(treeTexture, scannerReach, scannerPosition);
                 Debug.Log("Number of spawned Trees: " + treePositions.Count);
 
                 foreach (Vector2 treePosition2D in treePositions)
@@ -62,12 +86,33 @@ public class TreePlacerTest : MonoBehaviour
                         treePosition2D.y);
                     Instantiate(treePrefab, treePosition, Quaternion.identity);
                 }
+                // Resetting to prevent several placing
+                didScanTrees = false;
+            }
+            
+            if (didScanBushes)
+            {
+                Vector2 scannerPosition = new Vector2(transform.position.x, transform.position.z);
+                List<Vector2> bushPositions = treePlacer.GetVegetationPositionsInWorld(bushTexture, scannerReach, scannerPosition);
+                Debug.Log("Number of spawned Bushes: " + bushPositions.Count);
+
+                foreach (Vector2 bushPosition2D in bushPositions)
+                {
+                    Debug.Log("X: " + bushPosition2D.x + " Y: " + bushPosition2D.y);
+                    // To find the elevation, SampleHeight function of the terrain is used
+                    Vector3 sampleHeightInput = new Vector3(bushPosition2D.x, 0, bushPosition2D.y);
+                    Vector3 bushPosition = new Vector3(bushPosition2D.x, terrain.SampleHeight(sampleHeightInput),
+                        bushPosition2D.y);
+                    Instantiate(bushPrefab, bushPosition, Quaternion.identity);
+                }
+                // Resetting to prevent several placing
+                didScanBushes = false;
             }
         }
     }
 
 
-    // Summery: Gets all trees in the world (!) 
+    // Summery: Gets all Trees in the world (!) 
     public List<GameObject> GetAllTrees()
     {
         List<GameObject> trees = new List<GameObject>();
@@ -79,25 +124,38 @@ public class TreePlacerTest : MonoBehaviour
 
         return trees;
     }
+    
+    // Summery: Gets all Bushes in the world (!) 
+    public List<GameObject> GetAllBushes()
+    {
+        List<GameObject> bushes = new List<GameObject>();
+
+        foreach (GameObject bush in GameObject.FindGameObjectsWithTag("Bushes"))
+        {
+            bushes.Add(bush);
+        }
+
+        return bushes;
+    }
 
 
     /* 
-    * Summery: Takes a list of trees and returns a new list with only trees within the scanner
+    * Summery: Takes a list of vegies and returns a new list with only vegies within the scanner
     * Takes:   All tree x,y coordinates, and the centerPoint of the scanner
     * Returns: A New list with only tree coordinates within the scanner range
     */
-    public List<GameObject> FilterTreesOutOfScannerReach(List<GameObject> trees, Vector2 scanerCenterPoint)
+    public List<GameObject> FilterVegetationOutOfScannerReach(List<GameObject> vegies, Vector2 scannerCenterPoint)
     {
         List<GameObject> treesInScannerReach = new List<GameObject>();
 
-        foreach (GameObject tree in trees)
+        foreach (GameObject vegie in vegies)
         {
-            Vector3 treePosition = tree.transform.position;
+            Vector3 vegiePosition = vegie.transform.position;
 
-            if (Mathf.Abs(scanerCenterPoint.x - treePosition.x) < 50f &&
-                Mathf.Abs(scanerCenterPoint.y - treePosition.z) < 50f)
+            if (Mathf.Abs(scannerCenterPoint.x - vegiePosition.x) < 50f &&
+                Mathf.Abs(scannerCenterPoint.y - vegiePosition.z) < 50f)
             {
-                treesInScannerReach.Add(tree);
+                treesInScannerReach.Add(vegie);
             }
         }
 

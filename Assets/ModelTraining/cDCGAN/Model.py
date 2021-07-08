@@ -1,5 +1,6 @@
 from time import sleep
 import numpy as np
+import pickle
 from typing import *
 from numpy import zeros
 from numpy import ones
@@ -305,6 +306,7 @@ def load_data_and_train(dataset=None, epochs=100, generator_model=None):
 	# train model
 	train(d_model, g_model, gan_model, dataset, n_epochs=epochs, augmented=True)
 	return g_model
+	
 
 class ModelRunner:
 	def __init__(self, path_to_model) -> None:
@@ -324,7 +326,22 @@ class ModelRunner:
 			dataset = Pipeline.collect_inference_data()
 			if (dataset != []):
 				output = self.infer(dataset)
+				#serialized_out = pickle.dumps(output, protocol=0)
+				print('TreeProxMap')
+				print_serialized_arr(output)
 				# serialize & sent output to stdout
+
+
+def print_serialized_arr(numpy_arr):
+	# numpy_arr.shape is (1, 256, 256, 3)
+	first_element = numpy_arr[0]
+	# select last channel out of the array and remove its channel dimension: (256, 256, 3) -> (256, 256)
+	first_element = np.squeeze(np.split(first_element, first_element.shape[-1], -1), axis=-1)
+	for row in first_element:
+		for col in row:
+			print(col, ' ', end='')
+		print()
+	pass
 
 # for rapid testing with different data shapes
 import sys
