@@ -193,6 +193,13 @@ public class TreePlacer
 		return new GroupIslandAnswerStruct(foundBiggerValue, biggerValueNotePosition, notesInIsland);
 	}
 
+
+	/* Summery: Pixels that have been looked at by GroupIslandBFS() 
+	 *			have to be crossed out so that the search on them won't get called twice
+	 * Takes:   A the list of nodes that GroupIslandBFS() found
+	 * Misc:	The check on crossed out pixels is in/for the FindTrees() function
+	 *			not GroupIslandBFS()
+	 */
 	private void CrossOutLowNonTreePixels(List<TexturePixelNode> pixels)
 	{
 		foreach (TexturePixelNode node in pixels)
@@ -204,7 +211,11 @@ public class TreePlacer
 		}
 	}
 
-
+	/* 
+	 * Summery: Takes a group of nodes got idetified as a tree. This function figures out the "exact" position of the tree
+	 * Takes:   A list of nodes that got idetified as a tree
+	 * Returns: A singele Verctor2Int that is the position of the tree on the texture
+	 */
 	private Vector2Int AveragePoint(List<TexturePixelNode> pixels)
     {
 		int averageX = 0;
@@ -227,19 +238,34 @@ public class TreePlacer
 }
 
 
+
+
+/* 
+ * Summery:					Class
+ * notesInIsland:			A List of pixels all adjacent to each other with the same value called "island"
+ * foundBiggerValue:		Bool that is true if adjacent to the group/island is a pixel with a larger value
+ * biggerValueNotePosition: Position of the pixel with the lager value 
+ */
 public class TexturePixelNode
 {
 	public decimal value;
 	// public bool isVisited = false;
-	// public bool isFinished = false;
+	// public bool isFinished = false; //shoud not be needed in BFS
 	public Vector2Int position;
 
+	//Constructor
 	public TexturePixelNode(Vector2Int position, decimal value)
     {
 		this.value = value;
 		this.position = position;
     }
 
+
+	/* 
+	 * Summery: Gets the 4 direct neighbors of the node this function is called on
+	 * Takes:   Array of nodes that also holds the neighbors of this node (and the node itself)
+	 * Returns: List of the 4 neighbors
+	 */
 	public List<TexturePixelNode> Get4Neighbors(TexturePixelNode[,] textureNodes)
 	{
 		List<TexturePixelNode> neighbors = new List<TexturePixelNode>();
@@ -264,6 +290,11 @@ public class TexturePixelNode
 		return neighbors;
 	}
 
+	/* 
+	 * Summery: Gets the 4 direct neighbors and the 4 diagonal neighbors of the node this function is called on
+	 * Takes:   Array of nodes that also holds the neighbors of this node (and the node itself)
+	 * Returns: List of the 8 neighbors
+	 */
 	public List<TexturePixelNode> Get8Neighbors(TexturePixelNode[,] textureNodes)
 	{
 		List<TexturePixelNode> neighbors = new List<TexturePixelNode>();
@@ -307,11 +338,21 @@ public class TexturePixelNode
 	}
 }
 
+
+
+
+/* 
+ * Summery: Data struct that gets returned  by GroupIslandBFS( )
+ * notesInIsland: A List of pixels all adjacent to each other with the same value called "island"
+ * foundBiggerValue: Bool that is true if adjacent to the group/island is a pixel with a larger value
+ * biggerValueNotePosition: Position of the pixel with the lager value 
+ */
 public struct GroupIslandAnswerStruct
 {
+
+	public List<TexturePixelNode> notesInIsland;
 	public bool foundBiggerValue;
 	public Vector2Int biggerValueNotePosition;
-	public List<TexturePixelNode> notesInIsland;
 
 	public GroupIslandAnswerStruct(bool foundBiggerValue, Vector2Int biggerValueNotePosition, List<TexturePixelNode> notesInIsland)
     {
