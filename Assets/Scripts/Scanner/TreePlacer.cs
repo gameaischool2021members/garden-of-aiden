@@ -34,8 +34,11 @@ public class TreePlacer
 	
 	/* Summery: Gets a (single channel?) texture with circular gradients
 	 *			Every circular gradient represents a tree
-	 *			Does some processing to find exact position of trees        
-	 * Returns:	List of tree position on texture
+	 *			Does some processing to find exact position of trees
+	 * Returns:	List of tree position on the world positions
+	 *			Essentially, does this with the help of the previously introduced function "GetTreePositionsInTexture"
+	 *			and translating the positions to the world positions with the help of current position of the scanner
+	 *			and its radius
 	 * Misc:    Orientation of input data is consistent with orientation of output data
 	 */
 	public List<Vector2> GetTreePositionsInWorld(float[,] texture, float scannerReach, Vector2 scannerPosition)
@@ -44,7 +47,7 @@ public class TreePlacer
 		List<Vector2> treePositions = new List<Vector2>();
 		foreach (Vector2Int treePosition in treePositionsInTexture)
 		{
-			// We need to take the current position of the scanner into the consideration
+			// We need to take the current position of the scanner into the consideration as the offset
 			float x = RemapValue(treePosition.x, 0, textureSizeX, -scannerReach + scannerPosition.x, scannerReach + scannerPosition.x);
 			float y = RemapValue(treePosition.y, 0, textureSizeY, -scannerReach + scannerPosition.y, scannerReach + scannerPosition.y);
 			treePositions.Add(new Vector2(x, y));
