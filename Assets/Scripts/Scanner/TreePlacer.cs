@@ -22,8 +22,9 @@ public class TreePlacer
 	 *			Every circular gradient represents a tree
 	 *			Does some processing to find exact position of trees        
 	 * Returns:	List of tree position on texture
+	 * Misc:    Orientation of input data is consistent with orientation of output data
 	 */
-	public List<Vector2Int> GetTreePositionsInOnTexture(float[,] texture)
+	public List<Vector2Int> GetTreePositionsInTexture(float[,] texture)
 	{
 		InitializeData(texture);
 		ReduceNumberOfColorsInTexture();

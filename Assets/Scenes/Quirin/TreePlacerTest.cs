@@ -41,7 +41,7 @@ public class TreePlacerTest : MonoBehaviour
         {
             if (didScan)
             {
-                List<Vector2Int> treePositons = treePlacer.GetTreePositionsInOnTexture(texture);
+                List<Vector2Int> treePositons = treePlacer.GetTreePositionsInTexture(texture);
                 Debug.Log("Nummber spawned Trees: " + treePositons.Count);
 
                 foreach (Vector2Int tree in treePositons)
