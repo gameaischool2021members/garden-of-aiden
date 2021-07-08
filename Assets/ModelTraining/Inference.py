@@ -8,9 +8,9 @@ def main():
     parser.parse_args()
 
     print('hi first')
-    model = Model.ModelRunner(parser.model)
+    # model = Model.ModelRunner(parser.model)
     print('hi')
-    model.listen()
+    # model.listen()
 
 if __name__ == '__main':
     sys.exit(main())

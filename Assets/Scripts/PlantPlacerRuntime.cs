@@ -38,10 +38,25 @@ public class PlantPlacerRuntime : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(RegenerateTiles());
+        //StartCoroutine(RegenerateTiles());
+        SynchronousRegenerateTiles();
         StartCoroutine(PlaceTrees());
 
         OnLandscapeUpdated(Vector2Int.zero);
+    }
+
+    private void SynchronousRegenerateTiles()
+    {
+        var pythonRunner = new PlantPlacerPythonRunner(model);
+
+        var thisUpdateTile = Vector2Int.zero;
+
+        pythonRunner.StartGenerating(CollectHeightMapAtTile(thisUpdateTile));
+
+        while(!pythonRunner.PollTileGenerationComplete());
+
+        var tileGenerationResults = pythonRunner.CachedPreviousResult;
+        EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions);
     }
 
     private IEnumerator RegenerateTiles()
