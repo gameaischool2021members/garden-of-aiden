@@ -11,7 +11,7 @@ public class PlantPlacerRoot : MonoBehaviour
 #pragma warning restore 0414
 
     [SerializeField]
-    public float tileWidthInWorldUnits = 10f;
+    public float tileWidthInWorldUnits = 200f;
 
     [SerializeField]
     public int proximityGradientWidthInTexels = 25;
