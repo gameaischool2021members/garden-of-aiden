@@ -24,13 +24,12 @@ public class PlantPlacerRootEditor : Editor
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
-    private static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
     private const int modelTrainingTimeout = 500000000;
     private float TrainModel()
     {
         var startInfo = new ProcessStartInfo();
 
-        startInfo.FileName = /*"python.exe";*/testPathToPython;
+        startInfo.FileName = PlantPlacerPythonRunner.testPathToPython;
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
@@ -147,12 +146,9 @@ public class PlantPlacerRootEditor : Editor
         stdInput.WriteLine("finish");
     }
 
-    private static void WriteMap(float[,] input, StreamWriter output)
+    public static void WriteMap(float[,] input, StreamWriter output)
     {
-        foreach (var mapLine in input.GetJagged())
-        {
-            output.WriteLine(String.Join(" ", mapLine));
-        }
+        PlantPlacerPythonRunner.WriteMap(input, output);
     }
 
     private static void DoIfAnyNonEmptyStrings(String output, Action<String> action)

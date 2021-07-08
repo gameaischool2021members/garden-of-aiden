@@ -52,7 +52,7 @@ public class PlantPlacerRuntime : MonoBehaviour
             var thisUpdateTile = queuedUpdates.First();
             queuedUpdates.RemoveAt(0);
 
-            pythonRunner.StartGenerating(thisUpdateTile);
+            pythonRunner.StartGenerating(CollectHeightMapAtTile(thisUpdateTile));
 
             yield return new WaitUntil(() => pythonRunner.PollTileGenerationComplete());
 
@@ -87,6 +87,11 @@ public class PlantPlacerRuntime : MonoBehaviour
         var height = targetTerrain.SampleHeight(treeXzPosition3);
         var treePosition = treeXzPosition3 + Vector3.up * height;
         Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
+    }
+
+    private float[,] CollectHeightMapAtTile(Vector2Int tile)
+    {
+        return new float[256,256];
     }
 
     private List<Vector2> queuedTreePlacements = new List<Vector2>();
