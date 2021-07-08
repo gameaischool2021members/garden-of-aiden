@@ -6,7 +6,11 @@ from typing import *
 import numpy
 from argparse import *
 import matplotlib.pyplot as plt
-import Model
+from cDCGAN import Model
+
+#! important
+# make sure to run `$ pip install -e .` in ModelTraining directory while inside python env
+from cDCGAN import Model 
 
 class TrainingInstance():
   def __init__(self, plant_data : numpy.ndarray, height_data : numpy.ndarray):
@@ -48,9 +52,12 @@ def collect_training_data() -> List[TrainingInstance]:
   return training_data
 
 def DEBUG_plot_first_instance(training_data):
+  dataset = reshape_data_for_training(training_data)
   training_instance = training_data[0]
+  plt.title(dataset[1].shape)
   plt.imshow(training_instance.plant_data, cmap='hot')
   plt.show()
+  plt.title(dataset[0].shape)
   plt.imshow(training_instance.height_data, cmap='hot')
   plt.show()
 
@@ -87,17 +94,33 @@ def parse_serialized_numpy_array(serialized_numpy_data : List[str]) -> numpy.nda
   return numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in serialized_numpy_data])
 
 def train_on_data(training_data : List[TrainingInstance]):
-  veg_maps_raw = numpy.array([training_instance.plant_data for training_instance in training_data])
-  veg_maps = numpy.repeat(numpy.reshape(veg_maps_raw, veg_maps_raw.shape + (1,)), 3, 3)
-  height_maps_raw = numpy.array([training_instance.plant_data for training_instance in training_data])
-  height_maps = numpy.repeat(numpy.reshape(height_maps_raw, height_maps_raw.shape + (1,)), 3, 3)
+  dataset = reshape_data_for_training(training_data)
 
-  generator_model = Model.load_data_and_train((veg_maps, height_maps))
+  generator_model = Model.load_data_and_train(dataset)
   generator_model.save('.\saved_model.keras')
 
   # debug value to satisfy debug requirements from Unity
   # replace with serialized model when finished
   return 100
+
+def reshape_data_for_training(training_data: List[TrainingInstance]) -> List[numpy.ndarray]:
+  # split training instances
+  input_data_height = [] # Height input channel
+  example_data_plant = [] # Plant real output channel
+  for i in range(len(training_data)):
+    input_data_height.append(training_data[i].height_data)
+    example_data_plant.append(training_data[i].plant_data)
+
+  # convert to numpy arrays
+  input_data_height = numpy.expand_dims(numpy.stack(input_data_height, axis=0), axis= -1)
+  input_data_height_shape = input_data_height.shape
+  input_data = numpy.broadcast_to(input_data_height, (input_data_height_shape[0], input_data_height_shape[1], input_data_height_shape[2], 3)).copy()
+
+
+  example_data_plant = numpy.expand_dims(numpy.stack(example_data_plant, axis=0), axis= -1)
+  example_data_plant_shape = example_data_plant.shape
+  example_data = numpy.broadcast_to(example_data_plant, (example_data_plant_shape[0], example_data_plant_shape[1], example_data_plant_shape[2], 3)).copy()
+  return [input_data, example_data]
 
 if __name__ == '__main__':
   sys.exit(main())
