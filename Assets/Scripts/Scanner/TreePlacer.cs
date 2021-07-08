@@ -10,16 +10,19 @@ public class TreePlacer
 {
 	//The texture
 	private decimal [,] decimalTexture;
-	//Used for the search
+	private int textureSizeX;
+	private int textureSizeY;
+
+	//Data for the search
 	private TexturePixelNode[,] textureNodes;
 	private bool[,] crossedOutPixels;
 	private bool[,] pixelsThatAreTrees;
 
-
-	//Is this right? Or do i rotate the texture here
-	private int textureSizeX;
-	private int textureSizeY;
-
+	/* Summery: Gets a (single channel?) texture with circular gradients
+	 *			Every circular gradient represents a tree
+	 *			Does some processing to find exact position of trees        
+	 * Returns:	List of tree position on texture
+	 */
 	public List<Vector2Int> GetTreePositionsInOnTexture(float[,] texture)
 	{
 		InitializeData(texture);
@@ -28,6 +31,7 @@ public class TreePlacer
 		return threePositions;
 	}
 
+	//Summery: Data initialization
 	void InitializeData(float[,] texture)
 	{
 		textureSizeX = texture.GetLength(0);
@@ -41,14 +45,15 @@ public class TreePlacer
 		{
 			for (int y = 0; y < textureSizeY; y++)
 			{
-				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]);
-				crossedOutPixels[x, y] = false; //Just to make shure
-
+				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]); //For save comparisons(==) and rounding
+				crossedOutPixels[x, y] = false; 
 				pixelsThatAreTrees[x, y] = false;
 			}
 		}
 	}
 
+
+	//Summery: To make the search easier, each value of the texture (between 0 and 1) gets rounded so a given decimal place
 	void ReduceNumberOfColorsInTexture()
 	{
 		for (int x = 0; x < textureSizeX; x++)
@@ -60,7 +65,12 @@ public class TreePlacer
 		}
 	}
 
-
+   /*Summery:   Linear iteration over the texture halts when potential tree is found
+	*			if it is a tree adds the tree to the list of tree positions
+	*			continues iteration
+	*			
+	*Returns:	List of tree position on texture
+	*/
 	private List<Vector2Int> FindTrees()
     {
 		InitializeSearchSpace();
@@ -85,17 +95,22 @@ public class TreePlacer
     }
 
 
-	//Recursive search for a tree
-	//always returns  (0,0)
+	/* Summery: Gets called when FindTrees() finds a pixel (with 0<value) that wasn't looked at by GroupPixelsWithTheSameValueToIslandBFS()
+	 *			This can mean that a new tree is found
+	 *			Starts a recursion until GroupPixelsWithTheSameValueToIslandBFS() dos not find a island that has an higher value
+	 *			Checks if island is a new tree, marks data, and returns position of the tree
+	 * Takes:   The node of a pixel with value>0 that wasn't looked at before
+	 * Returns:	Single Vector2Int that has the position of the tree or a Vector2Int(-1, -1) if the tree was already known
+	 */
 	private Vector2Int FindTreeForPixel(TexturePixelNode pixel)
     {
 		// InitializeSearchSpace();
 		Vector2Int treePosition = new Vector2Int(0,0);
-		GroupIslandAnswerStruct result = GroupIslandBFS(pixel);
+		GroupIslandAnswerStruct result = GroupPixelsWithTheSameValueToIslandBFS(pixel);
 
 		if (result.foundBiggerValue)
 		{
-			CrossOutLowNonTreePixels(result.notesInIsland);
+			CrossOutExaminedPixels(result.notesInIsland);
 			//When no bigger value is left recursion stops
 			treePosition = FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
 		}
@@ -109,7 +124,7 @@ public class TreePlacer
 				if(pixelsThatAreTrees[x, y])
                 {
 					//Naw its a old tree
-					CrossOutLowNonTreePixels(result.notesInIsland);
+					CrossOutExaminedPixels(result.notesInIsland);
 					return new Vector2Int(-1, -1);
                 }
 			}
@@ -117,7 +132,7 @@ public class TreePlacer
 
 			//YAY! We found a NEW tree (I hope)
 			treePosition = AveragePoint(result.notesInIsland);
-			CrossOutLowNonTreePixels(result.notesInIsland);
+			CrossOutExaminedPixels(result.notesInIsland);
 
 			//Mark trees as trees
 			foreach(TexturePixelNode tree in result.notesInIsland)
@@ -129,6 +144,10 @@ public class TreePlacer
 		return treePosition;
 	}
 
+
+	/* Summery: Initializes the search space
+	 *			with nodes that hold some extra data that could be extended upon
+	 */
 	private void InitializeSearchSpace()
 	{
 		textureNodes = new TexturePixelNode[textureSizeX, textureSizeY];
@@ -142,19 +161,27 @@ public class TreePlacer
 		}
 	}
 
-	private GroupIslandAnswerStruct GroupIslandBFS(TexturePixelNode start)
+
+	/* Summery: Goups pixels in to an "island". All pixels are adjacent to each other and share the same value.
+	 *			Also checks if there is an adjacent group of pixels with a lager value
+	 * Takes:   The node of the starting pixel
+	 * Returns:	A GroupIslandAnswerStruct for more information on this go there	
+	 */
+	private GroupIslandAnswerStruct GroupPixelsWithTheSameValueToIslandBFS(TexturePixelNode startPixelNode)
 	{
+		//Initialize queue for BFS
 		Queue<TexturePixelNode> queue = new Queue<TexturePixelNode>();
 
-		//Begin: return data
+		//Begin: Initialize return data
 		bool foundBiggerValue = false;
 		Vector2Int biggerValueNotePosition = new Vector2Int(0, 0);
 		List<TexturePixelNode> notesInIsland = new List<TexturePixelNode>();
-		//End: return data
+		//End: Initialize return data
 
-		decimal islandValue = start.value;
-		queue.Enqueue(start);
-		notesInIsland.Add(start);
+		//Begin: Initialize data for BFS
+		decimal islandValue = startPixelNode.value;
+		queue.Enqueue(startPixelNode);
+		notesInIsland.Add(startPixelNode);
 		// start.isVisited = true;
 		bool[,] isVisited = new bool[textureSizeX, textureSizeY];
 		for (int x = 0; x < textureSizeX; x++)
@@ -164,9 +191,10 @@ public class TreePlacer
 				isVisited[x, y] = false;
 			}
 		}
+		isVisited[startPixelNode.position.x, startPixelNode.position.y] = true;
+		//End: Initialize data for BFS
 
-		isVisited[start.position.x, start.position.y] = true;
-
+		//Breadth first search
 		while (queue.Count > 0)
 		{
 			TexturePixelNode currentNote = queue.Dequeue();
@@ -175,15 +203,16 @@ public class TreePlacer
 			{
 				if (!isVisited[neighbor.position.x, neighbor.position.y])
 				{
+					//Only goups pixels with the same value
 					if (neighbor.value == islandValue)
 					{
 						queue.Enqueue(neighbor);
-						notesInIsland.Add(neighbor);
+						notesInIsland.Add(neighbor);					 //For the return data
 					}
 					else if (islandValue < neighbor.value)
 					{
-						foundBiggerValue = true;
-						biggerValueNotePosition = neighbor.position;
+						foundBiggerValue = true;						 //For the return data
+						biggerValueNotePosition = neighbor.position;	 //For the return data
 					}
 					isVisited[neighbor.position.x, neighbor.position.y] = true;
 				}
@@ -200,7 +229,7 @@ public class TreePlacer
 	 * Misc:	The check on crossed out pixels is in/for the FindTrees() function
 	 *			not GroupIslandBFS()
 	 */
-	private void CrossOutLowNonTreePixels(List<TexturePixelNode> pixels)
+	private void CrossOutExaminedPixels(List<TexturePixelNode> pixels)
 	{
 		foreach (TexturePixelNode node in pixels)
 		{
@@ -245,6 +274,10 @@ public class TreePlacer
  * notesInIsland:			A List of pixels all adjacent to each other with the same value called "island"
  * foundBiggerValue:		Bool that is true if adjacent to the group/island is a pixel with a larger value
  * biggerValueNotePosition: Position of the pixel with the lager value 
+ * 
+ * Misc: Might be obsolete if we want to construct an extra bool array during the BFS
+ *       but i won't change it now bc of time and i don't want to break stuff
+ *       also might be useful for extension later
  */
 public class TexturePixelNode
 {
