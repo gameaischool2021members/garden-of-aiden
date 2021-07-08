@@ -1,8 +1,6 @@
-# example of pix2pix gan for satellite to map image-to-image translation
-from numpy import load
+import numpy as np
 from numpy import zeros
 from numpy import ones
-from numpy import expand_dims
 from numpy.random import randint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import RandomNormal
@@ -20,6 +18,7 @@ from matplotlib import pyplot
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.datasets.fashion_mnist import load_data
+from numpy import expand_dims
 
 # define the discriminator model
 def define_discriminator(image_shape):
@@ -32,26 +31,26 @@ def define_discriminator(image_shape):
 	# concatenate images channel-wise
 	merged = Concatenate()([in_src_image, in_target_image])
 	# C64
-	d = Conv2D(64, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(merged)
+	d = Conv2D(16, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(merged)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C128
-	d = Conv2D(128, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(32, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C256
-	d = Conv2D(256, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(64, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C512
-	d = Conv2D(512, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# second last output layer
-	d = Conv2D(512, (4,4), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (8, 8), padding='same', kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
 	# output
-	d = Conv2D(1, (4,4), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(1, (8, 8), padding='same', kernel_initializer=init)(d)
 	out_layer = Activation('sigmoid')(d)
 	# define model
 	model = Model([in_src_image, in_target_image], out_layer)
@@ -65,7 +64,7 @@ def define_encoder_block(layer_in, n_filters, batchnorm=True):
 	# weight initialization
 	init = RandomNormal(stddev=0.02)
 	# add downsampling layer
-	g = Conv2D(n_filters, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(layer_in)
+	g = Conv2D(n_filters, (8, 8), strides=(2, 2), padding='same', kernel_initializer=init)(layer_in)
 	# conditionally add batch normalization
 	if batchnorm:
 		g = BatchNormalization()(g, training=True)
@@ -78,7 +77,7 @@ def decoder_block(layer_in, skip_in, n_filters, dropout=True):
 	# weight initialization
 	init = RandomNormal(stddev=0.02)
 	# add upsampling layer
-	g = Conv2DTranspose(n_filters, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(layer_in)
+	g = Conv2DTranspose(n_filters, (8, 8), strides=(2, 2), padding='same', kernel_initializer=init)(layer_in)
 	# add batch normalization
 	g = BatchNormalization()(g, training=True)
 	# conditionally add dropout
@@ -97,26 +96,26 @@ def define_generator(image_shape=(256,256,3)):
 	# image input
 	in_image = Input(shape=image_shape)
 	# encoder model
-	e1 = define_encoder_block(in_image, 64, batchnorm=False)
-	e2 = define_encoder_block(e1, 128)
-	e3 = define_encoder_block(e2, 256)
-	e4 = define_encoder_block(e3, 512)
-	e5 = define_encoder_block(e4, 512)
-	e6 = define_encoder_block(e5, 512)
-	e7 = define_encoder_block(e6, 512)
+	e1 = define_encoder_block(in_image, 16, batchnorm=False)
+	e2 = define_encoder_block(e1, 32)
+	e3 = define_encoder_block(e2, 64)
+	e4 = define_encoder_block(e3, 128)
+	e5 = define_encoder_block(e4, 128)
+	#e6 = define_encoder_block(e5, 128)
+	#e7 = define_encoder_block(e6, 128)
 	# bottleneck, no batch norm and relu
-	b = Conv2D(512, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(e7)
+	b = Conv2D(128, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(e5)
 	b = Activation('relu')(b)
 	# decoder model
-	d1 = decoder_block(b, e7, 512)
-	d2 = decoder_block(d1, e6, 512)
-	d3 = decoder_block(d2, e5, 512)
-	d4 = decoder_block(d3, e4, 512, dropout=False)
-	d5 = decoder_block(d4, e3, 256, dropout=False)
-	d6 = decoder_block(d5, e2, 128, dropout=False)
-	d7 = decoder_block(d6, e1, 64, dropout=False)
+	#d1 = decoder_block(b, e7, 128)
+	#d2 = decoder_block(b, e6, 128)
+	d3 = decoder_block(b, e5, 128)
+	d4 = decoder_block(d3, e4, 128, dropout=False)
+	d5 = decoder_block(d4, e3, 64, dropout=False)
+	d6 = decoder_block(d5, e2, 32, dropout=False)
+	d7 = decoder_block(d6, e1, 16, dropout=False)
 	# output
-	g = Conv2DTranspose(3, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(d7)
+	g = Conv2DTranspose(3, (8, 8), strides=(2,2), padding='same', kernel_initializer=init)(d7)
 	out_image = Activation('tanh')(g)
 	# define model
 	model = Model(in_image, out_image)
@@ -141,28 +140,12 @@ def define_gan(g_model, d_model, image_shape):
 	model.compile(loss=['binary_crossentropy', 'mae'], optimizer=opt, loss_weights=[1,100])
 	return model
 
-# load and prepare training images
-def load_real_samples(filename):
-	# load compressed arrays
-	data = load(filename)
-	# unpack arrays
-	X1, X2 = data['arr_0'], data['arr_1']
-	# scale from [0,255] to [-1,1]
-	X1 = (X1 - 127.5) / 127.5
-	X2 = (X2 - 127.5) / 127.5
-	return [X1, X2]
 
-# load fashion mnist images
-def load_mnist_samples():
-	# load dataset
-	(trainX, trainy), (_, _) = load_data()
-	# expand to 3d, e.g. add channels
-	X = expand_dims(trainX, axis=-1)
-	# convert from ints to floats
-	X = X.astype('float32')
-	# scale from [0,255] to [-1,1]
-	X = (X - 127.5) / 127.5
-	return [X, trainy]
+def load_random_samples(shape=(1000, 64, 64, 3)):
+	# generate random dataset
+	trainy = np.random.default_rng().uniform(size=shape)
+	trainX = np.random.default_rng().uniform(size=shape)
+	return [trainX, trainy]
 
 # select a batch of random samples, returns images and target
 def generate_real_samples(dataset, n_samples, patch_shape):
@@ -176,6 +159,7 @@ def generate_real_samples(dataset, n_samples, patch_shape):
 	y = ones((n_samples, patch_shape, patch_shape, 1))
 	return [X1, X2], y
 
+
 # generate a batch of images, returns images and targets
 def generate_fake_samples(g_model, samples, patch_shape):
 	# generate fake instance
@@ -183,6 +167,7 @@ def generate_fake_samples(g_model, samples, patch_shape):
 	# create 'fake' class labels (0)
 	y = zeros((len(X), patch_shape, patch_shape, 1))
 	return X, y
+
 
 # generate samples and save as a plot and save the model
 def summarize_performance(step, g_model, dataset, n_samples=3):
@@ -218,12 +203,18 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 	g_model.save(filename2)
 	print('>Saved: %s and %s' % (filename1, filename2))
 
-# train pix2pix models
-def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
+
+# train models
+def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1, augmented=False):
 	# determine the output square shape of the discriminator
 	n_patch = d_model.output_shape[1]
+
+	if (augmented):
+		dataset = next(augment_data(dataset, batch_size=dataset[0].shape[0] * 2))
+
 	# unpack dataset
 	trainA, trainB = dataset
+
 	# calculate the number of batches per training epoch
 	bat_per_epo = int(len(trainA) / n_batch)
 	# calculate the number of training iterations
@@ -241,25 +232,72 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 		# update the generator
 		g_loss, _, _ = gan_model.train_on_batch(X_realA, [y_real, X_realB])
 		# summarize performance
-		print('>%d, d1[%.3f] d2[%.3f] g[%.3f]' % (i+1, d_loss1, d_loss2, g_loss))
+		print('>%d, d1 (real sample loss)[%.3f] d2 (generated sample loss)[%.3f] g[%.3f]' % (i+1, d_loss1, d_loss2, g_loss))
 		# summarize model performance
 		if (i+1) % (bat_per_epo * 10) == 0:
 			summarize_performance(i, g_model, dataset)
 
+# create iterators for both sets of images with rotation, zoom, width and height shift applied
+def augment_data(dataset, batch_size=1):
+	X, y = dataset
+	seed = 1
+	# generator params
+	data_gen_args = dict(
+		rotation_range=90,
+        zoom_range=0.1,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=True
+		)
+	# create and fit both generators with the same seed and args
+	datagen_x = ImageDataGenerator(**data_gen_args)
+	datagen_y = ImageDataGenerator(**data_gen_args)
+	datagen_x.fit(X, seed=seed)
+	datagen_y.fit(y, seed=seed)
 
+	return zip(datagen_x.flow(X, seed=seed, batch_size=batch_size), datagen_y.flow(y, seed=seed, batch_size=batch_size))
+
+
+def verify_augmentation():
+	# load some data
+	(trainX, _), (_, _) = load_data()
+	(trainZ, _), (_, _) = load_data()
+	# augment data
+	augmented_data = augment_data([expand_dims(trainX, axis=-1), expand_dims(trainZ, axis=-1)], batch_size=trainX.shape[0])
+	# verify data is one-to-one
+	for _ in range(10):
+		a, b = next(augmented_data)
+		print((a == b).all())
+		print(a.shape)
+	
+	a, b = next(augmented_data)
+	assert((a == b).all())
+
+
+# dataset type: [np.Array, np.Array]
+# each array must have the same shape
+# dataset[0] should be the input data to the generator
+# dataset[1] should be the example of the corresponding vegetation map
 def load_data_and_train(dataset=None):
 	# load image data
-	#dataset = load_real_samples('maps_256.npz')
 	if dataset is None:
-		dataset = load_mnist_samples()
+		dataset = load_random_samples()
 		
 	print('Loaded', dataset[0].shape, dataset[1].shape)
 	# define input shape based on the loaded dataset
 	image_shape = dataset[0].shape[1:]
+	print('Image shape: ', image_shape)
 	# define the models
 	d_model = define_discriminator(image_shape)
 	g_model = define_generator(image_shape)
 	# define the composite model
 	gan_model = define_gan(g_model, d_model, image_shape)
 	# train model
-	train(d_model, g_model, gan_model, dataset)
+	train(d_model, g_model, gan_model, dataset, augmented=True)
+	return 0
+
+# for rapid testing with different data shapes
+import sys
+if __name__ == "__main__":
+	sys.exit(load_data_and_train(None))
