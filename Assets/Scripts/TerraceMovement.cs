@@ -7,8 +7,8 @@ public class TerraceMovement : MonoBehaviour
 {
     public Terrain terrain;
 
-    public float heightChange = 1.1f;
-
+    public float heightChange = 1.0f;
+    public float brushRadius = 20.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -42,15 +42,7 @@ public class TerraceMovement : MonoBehaviour
 
                 float[,] heights = terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution);
 
-
-                if (heights[hitPointTerZ, hitPointTerX] == 0)
-                {
-                    heights[hitPointTerZ, hitPointTerX] = 0.01f;
-                }
-                else
-                {
-                    heights[hitPointTerZ, hitPointTerX] = heights[hitPointTerZ, hitPointTerX] * heightChange;
-                }
+                AddRadialGradient(ref heights, new Vector2Int(hitPointTerZ, hitPointTerX));
 
                 terrain.terrainData.SetHeights(0, 0, heights);
                 terrain.terrainData.SyncHeightmap();
@@ -75,6 +67,10 @@ public class TerraceMovement : MonoBehaviour
         terrain.terrainData.SetHeights(0, 0, heights);
     }
 
+    private void AddRadialGradient(ref float[,] heights, Vector2Int center)
+    {
+        heights[center.x, center.y] += heightChange;
+    }
 }    
 
 
