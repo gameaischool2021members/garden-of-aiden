@@ -81,6 +81,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: tree_blocks_dark Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3417b74ec58534c8eb4d548eb479d5e3, type: 3}
+      propertyPath: m_TagString
+      value: Trees
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3417b74ec58534c8eb4d548eb479d5e3, type: 3}
 --- !u!1 &4725101787582647881 stripped
