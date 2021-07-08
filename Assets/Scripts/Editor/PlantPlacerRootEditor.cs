@@ -97,7 +97,7 @@ public class PlantPlacerRootEditor : Editor
 
     private void CollectAndSendTrainingDataToTrainer(Process process)
     {
-        var scanner = new TreeScanner();
+        var scanner = new VegetationScanner();
 
         var terrain = TargetComponent.GetComponent<Terrain>();
         var centerPointBounds = terrain.terrainData.bounds;
