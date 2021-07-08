@@ -6,7 +6,7 @@ using UnityEngine;
 using System;
 
 
-public class TreePlacer
+public class VegetationPlacer
 {
 	//The texture
 	private decimal [,] decimalTexture;
@@ -16,43 +16,43 @@ public class TreePlacer
 	//Data for the search
 	private TexturePixelNode[,] textureNodes;
 	private bool[,] crossedOutPixels;
-	private bool[,] pixelsThatAreTrees;
+	private bool[,] pixelsThatArevegetations;
 
 	/* Summery: Gets a (single channel?) texture with circular gradients
-	 *			Every circular gradient represents a tree
-	 *			Does some processing to find exact position of trees        
-	 * Returns:	List of tree position on texture
+	 *			Every circular gradient represents a vegetation
+	 *			Does some processing to find exact position of vegetations        
+	 * Returns:	List of vegetation position on texture
 	 * Misc:    Orientation of input data is consistent with orientation of output data
 	 */
-	public List<Vector2Int> GetTreePositionsInTexture(float[,] texture)
+	public List<Vector2Int> GetVegetationPositionsInTexture(float[,] texture)
 	{
 		InitializeData(texture);
 		ReduceNumberOfColorsInTexture();
-		List<Vector2Int> threePositions = FindTrees();
-		return threePositions;
+		List<Vector2Int> vegetationPosition = FindVegetation();
+		return vegetationPosition;
 	}
 	
 	/* Summery: Gets a (single channel?) texture with circular gradients
-	 *			Every circular gradient represents a tree
-	 *			Does some processing to find exact position of trees
-	 * Returns:	List of tree position on the world positions
-	 *			Essentially, does this with the help of the previously introduced function "GetTreePositionsInTexture"
+	 *			Every circular gradient represents a vegetation
+	 *			Does some processing to find exact position of vegetations
+	 * Returns:	List of vegetation position on the world positions
+	 *			Essentially, does this with the help of the previously introduced function "GetVegetationPositionsInTexture"
 	 *			and translating the positions to the world positions with the help of current position of the scanner
 	 *			and its radius
 	 * Misc:    Orientation of input data is consistent with orientation of output data
 	 */
-	public List<Vector2> GetTreePositionsInWorld(float[,] texture, float scannerReach, Vector2 scannerPosition)
+	public List<Vector2> GetVegetationPositionsInWorld(float[,] texture, float scannerReach, Vector2 scannerPosition)
 	{
-		List<Vector2Int> treePositionsInTexture = GetTreePositionsInTexture(texture);
-		List<Vector2> treePositions = new List<Vector2>();
-		foreach (Vector2Int treePosition in treePositionsInTexture)
+		List<Vector2Int> vegetationPositionsInTexture = GetVegetationPositionsInTexture(texture);
+		List<Vector2> vegetationPositions = new List<Vector2>();
+		foreach (Vector2Int vegetationPosition in vegetationPositionsInTexture)
 		{
 			// We need to take the current position of the scanner into the consideration as the offset
-			float x = RemapValue(treePosition.x, 0, textureSizeX, -scannerReach + scannerPosition.x, scannerReach + scannerPosition.x);
-			float y = RemapValue(treePosition.y, 0, textureSizeY, -scannerReach + scannerPosition.y, scannerReach + scannerPosition.y);
-			treePositions.Add(new Vector2(x, y));
+			float x = RemapValue(vegetationPosition.x, 0, textureSizeX, -scannerReach + scannerPosition.x, scannerReach + scannerPosition.x);
+			float y = RemapValue(vegetationPosition.y, 0, textureSizeY, -scannerReach + scannerPosition.y, scannerReach + scannerPosition.y);
+			vegetationPositions.Add(new Vector2(x, y));
 		}
-		return treePositions;
+		return vegetationPositions;
 	}
 
 	//Summery: Data initialization
@@ -63,7 +63,7 @@ public class TreePlacer
 
 		decimalTexture = new decimal[textureSizeX, textureSizeY];
 		crossedOutPixels = new bool[textureSizeX, textureSizeY];
-		pixelsThatAreTrees = new bool[textureSizeX, textureSizeY];
+		pixelsThatArevegetations = new bool[textureSizeX, textureSizeY];
 
 		for (int x = 0; x < textureSizeX; x++)
 		{
@@ -71,7 +71,7 @@ public class TreePlacer
 			{
 				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]); //For save comparisons(==) and rounding
 				crossedOutPixels[x, y] = false; 
-				pixelsThatAreTrees[x, y] = false;
+				pixelsThatArevegetations[x, y] = false;
 			}
 		}
 	}
@@ -89,16 +89,16 @@ public class TreePlacer
 		}
 	}
 
-   /*Summery:   Linear iteration over the texture halts when potential tree is found
-	*			if it is a tree adds the tree to the list of tree positions
+   /*Summery:   Linear iteration over the texture halts when potential vegetation is found
+	*			if it is a vegetation adds the vegetation to the list of vegetation positions
 	*			continues iteration
 	*			
-	*Returns:	List of tree position on texture
+	*Returns:	List of vegetation position on texture
 	*/
-	private List<Vector2Int> FindTrees()
+	private List<Vector2Int> FindVegetation()
     {
 		InitializeSearchSpace();
-		List<Vector2Int> treePositionsOnTexture = new List<Vector2Int>();
+		List<Vector2Int> vegetationPositionsOnTexture = new List<Vector2Int>();
 		for (int x = 0; x < textureSizeX; x++)
 		{
 			for (int y = 0; y < textureSizeY; y++)
@@ -107,65 +107,65 @@ public class TreePlacer
 				// Also only checking the pixels which have non zero values
 				if (!crossedOutPixels[x, y] && 0 < textureNodes[x, y].value) 
                 {
-					Vector2Int result = FindTreeForPixel(textureNodes[x, y]);
+					Vector2Int result = FindVegetationForPixel(textureNodes[x, y]);
 					if(! (result == new Vector2Int(-1, -1)) )
                     {
-						treePositionsOnTexture.Add(result);
+						vegetationPositionsOnTexture.Add(result);
 					}
 				}			
 			}
 		}
-		return treePositionsOnTexture;
+		return vegetationPositionsOnTexture;
     }
 
 
-	/* Summery: Gets called when FindTrees() finds a pixel (with 0<value) that wasn't looked at by GroupPixelsWithTheSameValueToIslandBFS()
-	 *			This can mean that a new tree is found
+	/* Summery: Gets called when FindVegetation() finds a pixel (with 0<value) that wasn't looked at by GroupPixelsWithTheSameValueToIslandBFS()
+	 *			This can mean that a new vegetation is found
 	 *			Starts a recursion until GroupPixelsWithTheSameValueToIslandBFS() dos not find a island that has an higher value
-	 *			Checks if island is a new tree, marks data, and returns position of the tree
+	 *			Checks if island is a new vegetation, marks data, and returns position of the vegetation
 	 * Takes:   The node of a pixel with value>0 that wasn't looked at before
-	 * Returns:	Single Vector2Int that has the position of the tree or a Vector2Int(-1, -1) if the tree was already known
+	 * Returns:	Single Vector2Int that has the position of the vegetation or a Vector2Int(-1, -1) if the vegetation was already known
 	 */
-	private Vector2Int FindTreeForPixel(TexturePixelNode pixel)
+	private Vector2Int FindVegetationForPixel(TexturePixelNode pixel)
     {
 		// InitializeSearchSpace();
-		Vector2Int treePosition = new Vector2Int(0,0);
+		Vector2Int vegetationPosition;
 		GroupIslandAnswerStruct result = GroupPixelsWithTheSameValueToIslandBFS(pixel);
 
 		if (result.foundBiggerValue)
 		{
 			CrossOutExaminedPixels(result.notesInIsland);
 			//When no bigger value is left recursion stops
-			treePosition = FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
+			vegetationPosition = FindVegetationForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
 		}
 		else
         {
 
-			foreach (TexturePixelNode tree in result.notesInIsland)
+			foreach (TexturePixelNode vegetation in result.notesInIsland)
 			{
-				int x = tree.position.x;
-				int y = tree.position.y;
-				if(pixelsThatAreTrees[x, y])
+				int x = vegetation.position.x;
+				int y = vegetation.position.y;
+				if(pixelsThatArevegetations[x, y])
                 {
-					//Naw its a old tree
+					//Naw its a old vegetation
 					CrossOutExaminedPixels(result.notesInIsland);
 					return new Vector2Int(-1, -1);
                 }
 			}
 
 
-			//YAY! We found a NEW tree (I hope)
-			treePosition = AveragePoint(result.notesInIsland);
+			//YAY! We found a NEW vegetation (I hope)
+			vegetationPosition = AveragePoint(result.notesInIsland);
 			CrossOutExaminedPixels(result.notesInIsland);
 
-			//Mark trees as trees
-			foreach(TexturePixelNode tree in result.notesInIsland)
+			//Mark vegetations as vegetations
+			foreach(TexturePixelNode vegetation in result.notesInIsland)
             {
-				pixelsThatAreTrees[tree.position.x, tree.position.y] = true;
+				pixelsThatArevegetations[vegetation.position.x, vegetation.position.y] = true;
             }
 		}
 
-		return treePosition;
+		return vegetationPosition;
 	}
 
 
@@ -250,7 +250,7 @@ public class TreePlacer
 	/* Summery: Pixels that have been looked at by GroupIslandBFS() 
 	 *			have to be crossed out so that the search on them won't get called twice
 	 * Takes:   A the list of nodes that GroupIslandBFS() found
-	 * Misc:	The check on crossed out pixels is in/for the FindTrees() function
+	 * Misc:	The check on crossed out pixels is in/for the FindVegetation() function
 	 *			not GroupIslandBFS()
 	 */
 	private void CrossOutExaminedPixels(List<TexturePixelNode> pixels)
@@ -265,9 +265,9 @@ public class TreePlacer
 	}
 
 	/* 
-	 * Summery: Takes a group of nodes got idetified as a tree. This function figures out the "exact" position of the tree
-	 * Takes:   A list of nodes that got idetified as a tree
-	 * Returns: A singele Verctor2Int that is the position of the tree on the texture
+	 * Summery: Takes a group of nodes got idetified as a vegetation. This function figures out the "exact" position of the vegetation
+	 * Takes:   A list of nodes that got idetified as a vegetation
+	 * Returns: A singele Verctor2Int that is the position of the vegetation on the texture
 	 */
 	private Vector2Int AveragePoint(List<TexturePixelNode> pixels)
     {
