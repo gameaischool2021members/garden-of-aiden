@@ -44,15 +44,18 @@ public class PlantPlacerRootEditor : Editor
 
         Process process = new Process();
         process.StartInfo = startInfo;
+        process.EnableRaisingEvents = true;
+        process.OutputDataReceived += OutputDataReceived;
+        process.ErrorDataReceived += ErrorOutputDataReceived;
         process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
 
         try
         {
             CollectAndSendTrainingDataToTrainer(process);
 
-            var hasClosed = process.WaitForExit(modelTrainingTimeout);
-
-            Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+            process.WaitForExit();
         }
         catch (IOException e)
         {
@@ -66,13 +69,29 @@ public class PlantPlacerRootEditor : Editor
             }
         }
 
-        var outputString = process.StandardOutput.ReadToEnd();
+        //var outputString = process.StandardOutput.ReadToEnd();
 
-        ReportSubProcessOutputs(process, "Python ML");
+        //ReportSubProcessOutputs(process, "Python ML");
 
         // Debug implementation
-        var output = float.Parse(outputString);
-        return output;
+        //var output = float.Parse(outputString);
+        return 1f;
+    }
+
+    private void OutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (!String.IsNullOrEmpty(e.Data))
+        {
+            UnityEngine.Debug.Log(e.Data);
+        }
+    }
+
+    private void ErrorOutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (!String.IsNullOrEmpty(e.Data))
+        {
+            UnityEngine.Debug.Log(e.Data);
+        }
     }
 
     private const int heightMapResolution = 256;
@@ -89,7 +108,7 @@ public class PlantPlacerRootEditor : Editor
 
         var stdInput = process.StandardInput;
 
-        for (var attemptIndex = 0; attemptIndex < 1; ++attemptIndex)
+        for (var attemptIndex = 0; attemptIndex < 10; ++attemptIndex)
         {
             var centerPoint = new Vector2(
                 UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),

@@ -7661,6 +7661,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 11400000, guid: df790a84a96767b4eababa34cecc2d26, type: 2}
+  tileWidthInWorldUnits: 10
+  proximityGradientWidthInTexels: 25
 --- !u!154 &2126977349
 TerrainCollider:
   m_ObjectHideFlags: 0
@@ -7696,7 +7698,7 @@ Terrain:
   m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
+  m_MaterialTemplate: {fileID: -3963241562183589234, guid: f3f7ae18adc985240b7f24050cd99d63, type: 3}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1

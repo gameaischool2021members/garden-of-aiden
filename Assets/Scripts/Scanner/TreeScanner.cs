@@ -16,7 +16,6 @@ public class TreeScanner
     }
 
 
-
     /* 
      * Summery: Call this to get your tree texture as a 2D Array
      * Takes:   The position

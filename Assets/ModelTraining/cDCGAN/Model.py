@@ -294,8 +294,8 @@ def load_data_and_train(dataset=None):
 	# define the composite model
 	gan_model = define_gan(g_model, d_model, image_shape)
 	# train model
-	train(d_model, g_model, gan_model, dataset, augmented=True)
-	return 0
+	train(d_model, g_model, gan_model, dataset, n_epochs=10, augmented=True)
+	return g_model
 
 # for rapid testing with different data shapes
 import sys
