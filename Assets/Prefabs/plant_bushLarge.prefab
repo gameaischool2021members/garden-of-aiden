@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 1472025534774179168}
   - component: {fileID: 2576750553808501445}
   - component: {fileID: 299071217482796559}
+  - component: {fileID: 8884012427098869258}
+  - component: {fileID: -4216436213284111794}
   m_Layer: 0
   m_Name: plant_bushLarge
   m_TagString: Bushes
@@ -81,3 +83,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8884012427098869258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2244621927542206426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff897ca785dce6d4fb9e8f3720c4eeb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dust: {fileID: 6025462603485093813, guid: 76bd3d69119b10c429e85b729c63189e, type: 3}
+  leaves: {fileID: 6330669218829455838, guid: c71f49cacfc010f459817a491eda90d6, type: 3}
+  materialPosition: 0
+--- !u!95 &-4216436213284111794
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2244621927542206426}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 41f7e1e2066a1784f8097646b4d47df5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

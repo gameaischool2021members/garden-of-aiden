@@ -59,11 +59,11 @@ public class TreePlacerTest : MonoBehaviour
 
             foreach (GameObject bush in bushes)
             {
-                // TreeParticles particles = bush.GetComponent<TreeParticles>();
-                // if(particles != null)
-                // {
-                //     particles.DestroyTree();
-                // }
+                TreeParticles particles = bush.GetComponent<TreeParticles>();
+                if(particles != null)
+                {
+                    particles.DestroyTree();
+                }
                 Debug.Log("X: " + bush.transform.position.x + " Y: " + bush.transform.position.z);
                 Destroy(bush);
             }
