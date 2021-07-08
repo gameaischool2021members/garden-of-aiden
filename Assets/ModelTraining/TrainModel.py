@@ -6,7 +6,7 @@ from typing import *
 import numpy
 from argparse import *
 import matplotlib.pyplot as plt
-import Model
+from cDCGAN import Model
 
 #! important
 # make sure to run `$ pip install -e .` in ModelTraining directory while inside python env
@@ -94,12 +94,9 @@ def parse_serialized_numpy_array(serialized_numpy_data : List[str]) -> numpy.nda
   return numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in serialized_numpy_data])
 
 def train_on_data(training_data : List[TrainingInstance]):
-  veg_maps_raw = numpy.array([training_instance.plant_data for training_instance in training_data])
-  veg_maps = numpy.repeat(numpy.reshape(veg_maps_raw, veg_maps_raw.shape + (1,)), 3, 3)
-  height_maps_raw = numpy.array([training_instance.plant_data for training_instance in training_data])
-  height_maps = numpy.repeat(numpy.reshape(height_maps_raw, height_maps_raw.shape + (1,)), 3, 3)
+  dataset = reshape_data_for_training(training_data)
 
-  generator_model = Model.load_data_and_train((veg_maps, height_maps))
+  generator_model = Model.load_data_and_train(dataset)
   generator_model.save('.\saved_model.keras')
 
   # debug value to satisfy debug requirements from Unity
