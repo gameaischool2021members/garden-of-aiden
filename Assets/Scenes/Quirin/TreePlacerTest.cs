@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TreePlacerTest : MonoBehaviour
 {
+    public Terrain terrain;
     private TreeScanner treeScanner;
     private TreePlacer treePlacer;
     private bool didScan = false;
@@ -47,11 +48,14 @@ public class TreePlacerTest : MonoBehaviour
                 List<Vector2> treePositions = treePlacer.GetTreePositionsInWorld(texture, scannerReach, scannerPosition);
                 Debug.Log("Number of spawned Trees: " + treePositions.Count);
 
-                foreach (Vector2 treePosition in treePositions)
+                foreach (Vector2 treePosition2D in treePositions)
                 {
-                    Debug.Log("X: " + treePosition.x + " Y: " + treePosition.y);
-
-                    Instantiate(treePrefab, new Vector3(treePosition.x, 0.1f, treePosition.y), Quaternion.identity);
+                    Debug.Log("X: " + treePosition2D.x + " Y: " + treePosition2D.y);
+                    // To find the elevation, SampleHeight function of the terrain is used
+                    Vector3 sampleHeightInput = new Vector3(treePosition2D.x, 0, treePosition2D.y);
+                    Vector3 treePosition = new Vector3(treePosition2D.x, terrain.SampleHeight(sampleHeightInput),
+                        treePosition2D.y);
+                    Instantiate(treePrefab, treePosition, Quaternion.identity);
                 }
             }
         }
