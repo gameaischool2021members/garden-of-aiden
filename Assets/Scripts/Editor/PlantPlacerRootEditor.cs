@@ -43,15 +43,18 @@ public class PlantPlacerRootEditor : Editor
 
         Process process = new Process();
         process.StartInfo = startInfo;
+        process.EnableRaisingEvents = true;
+        process.OutputDataReceived += OutputDataReceived;
+        process.ErrorDataReceived += ErrorOutputDataReceived;
         process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
 
         try
         {
             CollectAndSendTrainingDataToTrainer(process);
 
             process.WaitForExit();
-
-            // Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
         }
         catch (IOException e)
         {
@@ -65,13 +68,29 @@ public class PlantPlacerRootEditor : Editor
             }
         }
 
-        var outputString = process.StandardOutput.ReadToEnd();
+        //var outputString = process.StandardOutput.ReadToEnd();
 
-        ReportSubProcessOutputs(process, "Python ML");
+        //ReportSubProcessOutputs(process, "Python ML");
 
         // Debug implementation
-        var output = float.Parse(outputString);
-        return output;
+        //var output = float.Parse(outputString);
+        return 1f;
+    }
+
+    private void OutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (!String.IsNullOrEmpty(e.Data))
+        {
+            UnityEngine.Debug.Log(e.Data);
+        }
+    }
+
+    private void ErrorOutputDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (!String.IsNullOrEmpty(e.Data))
+        {
+            UnityEngine.Debug.Log(e.Data);
+        }
     }
 
     private const int heightMapResolution = 256;
