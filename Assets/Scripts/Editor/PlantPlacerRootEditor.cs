@@ -24,12 +24,12 @@ public class PlantPlacerRootEditor : Editor
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
-    private const int modelTrainingTimeout = 5000;
+    // private const int modelTrainingTimeout = 5000;
     private float TrainModel()
     {
         var startInfo = new ProcessStartInfo();
 
-        startInfo.FileName = "python.exe";
+        startInfo.FileName = "G:\\Users\\Anthony\\venv\\aiden\\Scripts\\python.exe";
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
@@ -49,9 +49,9 @@ public class PlantPlacerRootEditor : Editor
         {
             CollectAndSendTrainingDataToTrainer(process);
 
-            var hasClosed = process.WaitForExit(modelTrainingTimeout);
+            process.WaitForExit();
 
-            Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
+            // Assert.IsTrue(hasClosed, "Timed out waiting for training to complete");
         }
         catch (IOException e)
         {
@@ -88,7 +88,7 @@ public class PlantPlacerRootEditor : Editor
 
         var stdInput = process.StandardInput;
 
-        for (var attemptIndex = 0; attemptIndex < 1; ++attemptIndex)
+        for (var attemptIndex = 0; attemptIndex < 10; ++attemptIndex)
         {
             var centerPoint = new Vector2(
                 UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),
