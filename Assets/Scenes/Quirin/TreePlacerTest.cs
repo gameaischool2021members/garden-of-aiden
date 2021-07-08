@@ -45,6 +45,8 @@ public class TreePlacerTest : MonoBehaviour
 
                 foreach (Vector2Int tree in treePositons)
                 {
+                   // Debug.Log("X: " + tree.x + " Y: " + tree.y);
+
                     Instantiate(treePrefab);
                 }
             }

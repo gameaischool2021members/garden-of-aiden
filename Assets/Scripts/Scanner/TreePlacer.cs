@@ -13,6 +13,8 @@ public class TreePlacer
 	//Used for the search
 	private TexturePixelNode[,] textureNodes;
 	private bool[,] crossedOutPixels;
+	private bool[,] pixelsThatAreTrees;
+
 
 	//Is this right? Or do i rotate the texture here
 	private int textureSizeX;
@@ -33,6 +35,7 @@ public class TreePlacer
 
 		decimalTexture = new decimal[textureSizeX, textureSizeY];
 		crossedOutPixels = new bool[textureSizeX, textureSizeY];
+		pixelsThatAreTrees = new bool[textureSizeX, textureSizeY];
 
 		for (int x = 0; x < textureSizeX; x++)
 		{
@@ -40,6 +43,8 @@ public class TreePlacer
 			{
 				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]);
 				crossedOutPixels[x, y] = false; //Just to make shure
+
+				pixelsThatAreTrees[x, y] = false;
 			}
 		}
 	}
@@ -68,7 +73,11 @@ public class TreePlacer
 				// Also only checking the pixels which have non zero values
 				if (!crossedOutPixels[x, y] && 0 < textureNodes[x, y].value) 
                 {
-					treePositionsOnTexture.Add(FindTreeForPixel(textureNodes[x, y]));
+					Vector2Int result = FindTreeForPixel(textureNodes[x, y]);
+					if(! (result == new Vector2Int(-1, -1)) )
+                    {
+						treePositionsOnTexture.Add(result);
+					}
 				}			
 			}
 		}
@@ -77,6 +86,7 @@ public class TreePlacer
 
 
 	//Recursive search for a tree
+	//always returns  (0,0)
 	private Vector2Int FindTreeForPixel(TexturePixelNode pixel)
     {
 		// InitializeSearchSpace();
@@ -87,13 +97,33 @@ public class TreePlacer
 		{
 			CrossOutLowNonTreePixels(result.notesInIsland);
 			//When no bigger value is left recursion stops
-			FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
+			treePosition = FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
 		}
 		else
         {
-			//YAY! We found a tree (I hope)
+
+			foreach (TexturePixelNode tree in result.notesInIsland)
+			{
+				int x = tree.position.x;
+				int y = tree.position.y;
+				if(pixelsThatAreTrees[x, y])
+                {
+					//Naw its a old tree
+					CrossOutLowNonTreePixels(result.notesInIsland);
+					return new Vector2Int(-1, -1);
+                }
+			}
+
+
+			//YAY! We found a NEW tree (I hope)
 			treePosition = AveragePoint(result.notesInIsland);
 			CrossOutLowNonTreePixels(result.notesInIsland);
+
+			//Mark trees as trees
+			foreach(TexturePixelNode tree in result.notesInIsland)
+            {
+				pixelsThatAreTrees[tree.position.x, tree.position.y] = true;
+            }
 		}
 
 		return treePosition;
