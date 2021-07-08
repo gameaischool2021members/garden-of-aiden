@@ -25,7 +25,7 @@ public class PlantPlacerRootEditor : Editor
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
     private static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
-    private const int modelTrainingTimeout = 5000;
+    private const int modelTrainingTimeout = 500000000;
     private float TrainModel()
     {
         var startInfo = new ProcessStartInfo();
