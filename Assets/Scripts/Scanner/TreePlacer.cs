@@ -31,6 +31,26 @@ public class TreePlacer
 		List<Vector2Int> threePositions = FindTrees();
 		return threePositions;
 	}
+	
+	/* Summery: Gets a (single channel?) texture with circular gradients
+	 *			Every circular gradient represents a tree
+	 *			Does some processing to find exact position of trees        
+	 * Returns:	List of tree position on texture
+	 * Misc:    Orientation of input data is consistent with orientation of output data
+	 */
+	public List<Vector2> GetTreePositionsInWorld(float[,] texture, float scannerReach, Vector2 scannerPosition)
+	{
+		List<Vector2Int> treePositionsInTexture = GetTreePositionsInTexture(texture);
+		List<Vector2> treePositions = new List<Vector2>();
+		foreach (Vector2Int treePosition in treePositionsInTexture)
+		{
+			// We need to take the current position of the scanner into the consideration
+			float x = RemapValue(treePosition.x, 0, textureSizeX, -scannerReach + scannerPosition.x, scannerReach + scannerPosition.x);
+			float y = RemapValue(treePosition.y, 0, textureSizeY, -scannerReach + scannerPosition.y, scannerReach + scannerPosition.y);
+			treePositions.Add(new Vector2(x, y));
+		}
+		return treePositions;
+	}
 
 	//Summery: Data initialization
 	void InitializeData(float[,] texture)
@@ -264,6 +284,20 @@ public class TreePlacer
 
 		return new Vector2Int(averageX, averageY);
 
+	}
+	
+	
+	
+	/* 
+     * Summery: Takes a value within a range and returns a value at the same percentage point at onther range
+     * Returns: Maped value
+     * Misc:    Whatch our for 0 divisons !!!!
+     * Example: RemapValue(6,   0, 10,   0, 50) returns 30
+     *          Maps value in range 0 to 10 to value in range 0 to 50
+     */
+	private float RemapValue(float inValue, float minIn, float maxIn, float minOut, float maxOut)
+	{
+		return (inValue - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
 	}
 }
 

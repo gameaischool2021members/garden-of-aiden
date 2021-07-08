@@ -8,6 +8,7 @@ public class TreePlacerTest : MonoBehaviour
     private TreePlacer treePlacer;
     private bool didScan = false;
     private float[,] texture;
+    private float scannerReach = 50f;
 
     [SerializeField]
     private GameObject treePrefab;
@@ -25,7 +26,7 @@ public class TreePlacerTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
         {
             Vector2 position = new Vector2(transform.position.x, transform.position.z);
-            texture = treeScanner.ScannForTrees(position, 50f, 25);
+            texture = treeScanner.ScanForTrees(position, scannerReach, 25);
             didScan = true;
 
             List<GameObject> trees = FilterTreesOutOfScannerReach(GetAllTrees(), position);
@@ -41,14 +42,16 @@ public class TreePlacerTest : MonoBehaviour
         {
             if (didScan)
             {
-                List<Vector2Int> treePositons = treePlacer.GetTreePositionsInTexture(texture);
-                Debug.Log("Nummber spawned Trees: " + treePositons.Count);
+                // List<Vector2Int> treePositions = treePlacer.GetTreePositionsInTexture(texture);
+                Vector2 scannerPosition = new Vector2(transform.position.x, transform.position.z);
+                List<Vector2> treePositions = treePlacer.GetTreePositionsInWorld(texture, scannerReach, scannerPosition);
+                Debug.Log("Number of spawned Trees: " + treePositions.Count);
 
-                foreach (Vector2Int tree in treePositons)
+                foreach (Vector2 treePosition in treePositions)
                 {
-                    Debug.Log("X: " + tree.x + " Y: " + tree.y);
+                    Debug.Log("X: " + treePosition.x + " Y: " + treePosition.y);
 
-                    Instantiate(treePrefab);
+                    Instantiate(treePrefab, new Vector3(treePosition.x, 0.1f, treePosition.y), Quaternion.identity);
                 }
             }
         }
