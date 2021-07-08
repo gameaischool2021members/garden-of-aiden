@@ -39,7 +39,7 @@ public class PlantPlacerPythonRunner
         var fullPathToModel = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativeModelPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
-            "--",
+            // "--",
             "--model", fullPathToModel,
         }.Select(arg => String.Format("\"{0}\"", arg)));
         startInfo.RedirectStandardInput = true;

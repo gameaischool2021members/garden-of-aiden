@@ -3,14 +3,14 @@ from argparse import *
 from cDCGAN import Model
 
 def main():
+    print('hi pre argparse')
+
     parser = ArgumentParser(description='Load model from filesystem and use for inference')
     parser.add_argument('--model', help='The path to the .h5 stored model', required=True, type=str)
-    parser.parse_args()
+    args = parser.parse_args()
 
-    print('hi first')
-    # model = Model.ModelRunner(parser.model)
-    print('hi')
-    # model.listen()
+    model = Model.ModelRunner(args.model)
+    model.listen()
 
-if __name__ == '__main':
+if __name__ == '__main__':
     sys.exit(main())
