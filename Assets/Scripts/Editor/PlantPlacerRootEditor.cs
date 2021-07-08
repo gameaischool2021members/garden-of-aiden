@@ -24,12 +24,13 @@ public class PlantPlacerRootEditor : Editor
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
+    private static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
     private const int modelTrainingTimeout = 5000;
     private float TrainModel()
     {
         var startInfo = new ProcessStartInfo();
 
-        startInfo.FileName = "python.exe";
+        startInfo.FileName = /*"python.exe";*/testPathToPython;
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,

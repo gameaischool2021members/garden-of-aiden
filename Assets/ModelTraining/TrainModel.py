@@ -7,6 +7,10 @@ import numpy
 from argparse import *
 import matplotlib.pyplot as plt
 
+#! important
+# make sure to run `$ pip install -e .` in ModelTraining directory while inside python env
+from cDCGAN import Model 
+
 class TrainingInstance():
   def __init__(self, plant_data : numpy.ndarray, height_data : numpy.ndarray):
     self.plant_data = plant_data
@@ -47,7 +51,9 @@ def collect_training_data() -> List[TrainingInstance]:
   return training_data
 
 def DEBUG_plot_first_instance(training_data):
+
   training_instance = training_data[0]
+  plt.title(training_instance.height_data.shape)
   plt.imshow(training_instance.plant_data, cmap='hot')
   plt.show()
   plt.imshow(training_instance.height_data, cmap='hot')
@@ -86,7 +92,19 @@ def parse_serialized_numpy_array(serialized_numpy_data : List[str]) -> numpy.nda
   return numpy.array([[float(string_element) for string_element in data_line.split(' ')] for data_line in serialized_numpy_data])
 
 def train_on_data(training_data : List[TrainingInstance]):
+  # split training instances
+  input_data_height = [] # Height input channel
+  output_data_plant = [] # Plant real output channel
+  for i in range(len(training_data)):
+    input_data_height.append(training_data[i].height_data)
+    output_data_plant.append(training_data[i].plant_data)
 
+  # convert to numpy arrays
+  input_data_height = numpy.expand_dims(numpy.stack(input_data_height, axis=0), axis= -1)
+  
+  output_data_plant = numpy.expand_dims(numpy.stack(output_data_plant, axis=0), axis= -1)
+
+  Model.load_data_and_train([input_data_height, output_data_plant])
   # debug value to satisfy debug requirements from Unity
   # replace with serialized model when finished
   return 100
