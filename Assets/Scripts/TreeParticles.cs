@@ -51,7 +51,7 @@ public class TreeParticles : MonoBehaviour
 
         leavesParticles.Play();
 
-        //Destoy this gameobject here
+        Destroy(this.gameObject);
     }
 
      /*OnDestroy gets also called on scene closing so it spawns leafs in to the editor scene that dont even show up it the scene hirachy bc unity is wierd
