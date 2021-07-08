@@ -92,7 +92,7 @@ def train_on_data(training_data : List[TrainingInstance]):
   height_maps_raw = numpy.array([training_instance.plant_data for training_instance in training_data])
   height_maps = numpy.repeat(numpy.reshape(height_maps_raw, height_maps_raw.shape + (1,)), 3, 3)
 
-  generator_model = Model.load_data_and_train((height_maps, veg_maps))
+  generator_model = Model.load_data_and_train((veg_maps, height_maps))
   generator_model.save('.\saved_model.keras')
 
   # debug value to satisfy debug requirements from Unity
