@@ -16,7 +16,6 @@ public class TreeScanner
     }
 
 
-
     /* 
      * Summery: Call this to get your tree texture as a 2D Array
      * Takes:   The position
@@ -28,6 +27,7 @@ public class TreeScanner
         texture = new float[textureSizeX, textureSizeY];
 
         List<Vector2> trees = GetTreesInScannerReach(scanerCenterPoint, scannerReach);
+        Debug.Log("Nummber of scanned trees: " + trees.Count);
         foreach (Vector2 tree in trees)
         {
             AddTreeToTexture(scanerCenterPoint, tree, scannerReach, textureGradiantRadius);

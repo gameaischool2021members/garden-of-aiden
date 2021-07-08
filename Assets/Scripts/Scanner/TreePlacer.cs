@@ -10,10 +10,13 @@ public class TreePlacer
 {
 	//The texture
 	private decimal [,] decimalTexture;
-	//Used for the serach
+	//Used for the search
 	private TexturePixelNode[,] textureNodes;
+	private bool[,] crossedOutPixels;
+	private bool[,] pixelsThatAreTrees;
 
-	//Is this rigtht? Or do i rotate the texture here
+
+	//Is this right? Or do i rotate the texture here
 	private int textureSizeX;
 	private int textureSizeY;
 
@@ -31,12 +34,17 @@ public class TreePlacer
 		textureSizeY = texture.GetLength(1);
 
 		decimalTexture = new decimal[textureSizeX, textureSizeY];
+		crossedOutPixels = new bool[textureSizeX, textureSizeY];
+		pixelsThatAreTrees = new bool[textureSizeX, textureSizeY];
 
 		for (int x = 0; x < textureSizeX; x++)
 		{
 			for (int y = 0; y < textureSizeY; y++)
 			{
 				decimalTexture[x, y] = Convert.ToDecimal(texture[x, y]);
+				crossedOutPixels[x, y] = false; //Just to make shure
+
+				pixelsThatAreTrees[x, y] = false;
 			}
 		}
 	}
@@ -55,14 +63,21 @@ public class TreePlacer
 
 	private List<Vector2Int> FindTrees()
     {
+		InitializeSearchSpace();
 		List<Vector2Int> treePositionsOnTexture = new List<Vector2Int>();
 		for (int x = 0; x < textureSizeX; x++)
 		{
 			for (int y = 0; y < textureSizeY; y++)
 			{
-				if(0 < textureNodes[x, y].value)
+				// We're not checking crossed out pixels
+				// Also only checking the pixels which have non zero values
+				if (!crossedOutPixels[x, y] && 0 < textureNodes[x, y].value) 
                 {
-					treePositionsOnTexture.Add(FindTreeForPixel(textureNodes[x, y]));
+					Vector2Int result = FindTreeForPixel(textureNodes[x, y]);
+					if(! (result == new Vector2Int(-1, -1)) )
+                    {
+						treePositionsOnTexture.Add(result);
+					}
 				}			
 			}
 		}
@@ -70,10 +85,11 @@ public class TreePlacer
     }
 
 
-	//Recursive serch for a tree
+	//Recursive search for a tree
+	//always returns  (0,0)
 	private Vector2Int FindTreeForPixel(TexturePixelNode pixel)
     {
-		InitializeSeachSpace();
+		// InitializeSearchSpace();
 		Vector2Int treePosition = new Vector2Int(0,0);
 		GroupIslandAnswerStruct result = GroupIslandBFS(pixel);
 
@@ -81,18 +97,39 @@ public class TreePlacer
 		{
 			CrossOutLowNonTreePixels(result.notesInIsland);
 			//When no bigger value is left recursion stops
-			FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
+			treePosition = FindTreeForPixel(textureNodes[result.biggerValueNotePosition.x, result.biggerValueNotePosition.y]);
 		}
 		else
         {
-			//YAY! We found a tree (i hope)
+
+			foreach (TexturePixelNode tree in result.notesInIsland)
+			{
+				int x = tree.position.x;
+				int y = tree.position.y;
+				if(pixelsThatAreTrees[x, y])
+                {
+					//Naw its a old tree
+					CrossOutLowNonTreePixels(result.notesInIsland);
+					return new Vector2Int(-1, -1);
+                }
+			}
+
+
+			//YAY! We found a NEW tree (I hope)
 			treePosition = AveragePoint(result.notesInIsland);
+			CrossOutLowNonTreePixels(result.notesInIsland);
+
+			//Mark trees as trees
+			foreach(TexturePixelNode tree in result.notesInIsland)
+            {
+				pixelsThatAreTrees[tree.position.x, tree.position.y] = true;
+            }
 		}
 
 		return treePosition;
 	}
 
-	private void InitializeSeachSpace()
+	private void InitializeSearchSpace()
 	{
 		textureNodes = new TexturePixelNode[textureSizeX, textureSizeY];
 
@@ -105,7 +142,7 @@ public class TreePlacer
 		}
 	}
 
-	public GroupIslandAnswerStruct GroupIslandBFS(TexturePixelNode start)
+	private GroupIslandAnswerStruct GroupIslandBFS(TexturePixelNode start)
 	{
 		Queue<TexturePixelNode> queue = new Queue<TexturePixelNode>();
 
@@ -118,27 +155,37 @@ public class TreePlacer
 		decimal islandValue = start.value;
 		queue.Enqueue(start);
 		notesInIsland.Add(start);
-		start.isVisited = true;
+		// start.isVisited = true;
+		bool[,] isVisited = new bool[textureSizeX, textureSizeY];
+		for (int x = 0; x < textureSizeX; x++)
+		{
+			for (int y = 0; y < textureSizeY; y++)
+			{
+				isVisited[x, y] = false;
+			}
+		}
+
+		isVisited[start.position.x, start.position.y] = true;
 
 		while (queue.Count > 0)
 		{
 			TexturePixelNode currentNote = queue.Dequeue();
 
-			foreach (TexturePixelNode child in currentNote.Get8Nighbors(textureNodes))
+			foreach (TexturePixelNode neighbor in currentNote.Get8Neighbors(textureNodes))
 			{
-				if (!child.isVisited)
+				if (!isVisited[neighbor.position.x, neighbor.position.y])
 				{
-					if (child.value == islandValue)
+					if (neighbor.value == islandValue)
 					{
-						queue.Enqueue(child);
-						notesInIsland.Add(child);
+						queue.Enqueue(neighbor);
+						notesInIsland.Add(neighbor);
 					}
-					else if (islandValue < child.value)
+					else if (islandValue < neighbor.value)
 					{
 						foundBiggerValue = true;
-						biggerValueNotePosition = child.position;
+						biggerValueNotePosition = neighbor.position;
 					}
-					child.isVisited = true;
+					isVisited[neighbor.position.x, neighbor.position.y] = true;
 				}
 			}
 		}
@@ -148,15 +195,13 @@ public class TreePlacer
 
 	private void CrossOutLowNonTreePixels(List<TexturePixelNode> pixels)
 	{
-
 		foreach (TexturePixelNode node in pixels)
 		{
-			decimalTexture[node.position.x, node.position.y] = -1;
-
-			//Do it for both to be shure but only use decimalTexture for the values and textureNodes for search
-			textureNodes[node.position.x, node.position.y].value = -1;
+			//decimalTexture[node.position.x, node.position.y] = -1;
+			crossedOutPixels[node.position.x, node.position.y] = true;
+			//Do it for both to be sure but only use decimalTexture for the values and textureNodes for search
+			//textureNodes[node.position.x, node.position.y].value = -1;
 		}
-
 	}
 
 
@@ -185,8 +230,8 @@ public class TreePlacer
 public class TexturePixelNode
 {
 	public decimal value;
-	public bool isVisited = false;
-	public bool isFinished = false;
+	// public bool isVisited = false;
+	// public bool isFinished = false;
 	public Vector2Int position;
 
 	public TexturePixelNode(Vector2Int position, decimal value)
@@ -195,7 +240,7 @@ public class TexturePixelNode
 		this.position = position;
     }
 
-	public List<TexturePixelNode> Get4Nighbors(TexturePixelNode[,] textureNodes)
+	public List<TexturePixelNode> Get4Neighbors(TexturePixelNode[,] textureNodes)
 	{
 		List<TexturePixelNode> neighbors = new List<TexturePixelNode>();
 
@@ -219,7 +264,7 @@ public class TexturePixelNode
 		return neighbors;
 	}
 
-	public List<TexturePixelNode> Get8Nighbors(TexturePixelNode[,] textureNodes)
+	public List<TexturePixelNode> Get8Neighbors(TexturePixelNode[,] textureNodes)
 	{
 		List<TexturePixelNode> neighbors = new List<TexturePixelNode>();
 
