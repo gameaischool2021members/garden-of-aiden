@@ -107,7 +107,7 @@ public class PlantPlacerRootEditor : Editor
 
         var stdInput = process.StandardInput;
 
-        for (var attemptIndex = 0; attemptIndex < 10; ++attemptIndex)
+        for (var attemptIndex = 0; attemptIndex < TargetComponent.numberOfDioramaSamples; ++attemptIndex)
         {
             var centerPoint = new Vector2(
                 UnityEngine.Random.Range(centerPointMin.x, centerPointMax.x),

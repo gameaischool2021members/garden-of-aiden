@@ -15,4 +15,7 @@ public class PlantPlacerRoot : MonoBehaviour
 
     [SerializeField]
     public int proximityGradientWidthInTexels = 25;
+
+    [SerializeField]
+    public int numberOfDioramaSamples = 25;
 }
