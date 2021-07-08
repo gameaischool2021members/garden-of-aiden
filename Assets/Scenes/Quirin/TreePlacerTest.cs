@@ -32,6 +32,7 @@ public class TreePlacerTest : MonoBehaviour
 
             foreach (GameObject tree in trees)
             {
+                Debug.Log("X: " + tree.transform.position.x + " Y: " + tree.transform.position.z);
                 Destroy(tree);
             }
         }
@@ -45,7 +46,7 @@ public class TreePlacerTest : MonoBehaviour
 
                 foreach (Vector2Int tree in treePositons)
                 {
-                   // Debug.Log("X: " + tree.x + " Y: " + tree.y);
+                    Debug.Log("X: " + tree.x + " Y: " + tree.y);
 
                     Instantiate(treePrefab);
                 }

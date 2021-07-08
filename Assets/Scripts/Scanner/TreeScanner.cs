@@ -20,6 +20,7 @@ public class TreeScanner
      * Summery: Call this to get your tree texture as a 2D Array
      * Takes:   The position
      * Returns: The texture as a 2D Array with values between 0 and 1
+     * Misc:    Orientation of input data is consistent with orientation of output data
      */
     public float[,] ScannForTrees(Vector2 scanerCenterPoint, float scannerReach, int textureGradiantRadius)
     {
