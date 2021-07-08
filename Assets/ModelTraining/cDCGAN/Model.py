@@ -1,10 +1,13 @@
+from time import sleep
 import numpy as np
+from typing import *
 from numpy import zeros
 from numpy import ones
 from numpy.random import randint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.models import Model
+from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import Conv2DTranspose
@@ -19,6 +22,8 @@ from matplotlib import pyplot
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.datasets.fashion_mnist import load_data
 from numpy import expand_dims
+
+from cDCGAN import Pipeline
 
 # define the discriminator model
 def define_discriminator(image_shape):
@@ -210,7 +215,7 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=1, n_batch=1, augmented
 	n_patch = d_model.output_shape[1]
 
 	if (augmented):
-		dataset = next(augment_data(dataset, batch_size=dataset[0].shape[0] * 2))
+		dataset = next(augment_data(dataset, batch_size=dataset[0].shape[0] * 10))
 
 	# unpack dataset
 	trainA, trainB = dataset
@@ -279,7 +284,7 @@ def verify_augmentation():
 # each array must have the same shape
 # dataset[0] should be the input data to the generator
 # dataset[1] should be the example of the corresponding vegetation map
-def load_data_and_train(dataset=None):
+def load_data_and_train(dataset=None, epochs=100, generator_model=None):
 	# load image data
 	if dataset is None:
 		dataset = load_random_samples()
@@ -290,12 +295,36 @@ def load_data_and_train(dataset=None):
 	print('Image shape: ', image_shape)
 	# define the models
 	d_model = define_discriminator(image_shape)
+
 	g_model = define_generator(image_shape)
+	if (generator_model is not None):
+		g_model = generator_model
+
 	# define the composite model
 	gan_model = define_gan(g_model, d_model, image_shape)
 	# train model
-	train(d_model, g_model, gan_model, dataset, n_epochs=10, augmented=True)
+	train(d_model, g_model, gan_model, dataset, n_epochs=epochs, augmented=True)
 	return g_model
+
+class ModelRunner:
+	def __init__(self, path_to_model) -> None:
+		self.model = load_model(path_to_model)
+
+	def infer(self, input: List[Pipeline.TrainingInstance]) -> np.ndarray:
+		input = Pipeline.reshape_data_for_inference(input)
+		return self.model.predict(input)
+
+	def retrain(self, dataset, epochs):
+		dataset = Pipeline.reshape_data_for_training(dataset)
+		self.model = load_data_and_train(dataset, epochs, generator_model=self.model)
+		
+	def listen(self):
+		while(True):
+			sleep(0.1)
+			dataset = Pipeline.collect_inference_data()
+			if (dataset != []):
+				output = self.infer(dataset)
+				# serialize & sent output to stdout
 
 # for rapid testing with different data shapes
 import sys
