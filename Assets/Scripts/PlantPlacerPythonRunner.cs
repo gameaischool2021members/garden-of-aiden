@@ -13,6 +13,14 @@ public class PlantPlacerPythonRunner
         StartProcess();
     }
 
+    ~PlantPlacerPythonRunner()
+    {
+        if (!process.HasExited)
+        {
+            process.Kill();
+        }
+    }
+
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "Inference.py");
     public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
     private void StartProcess()
