@@ -42,12 +42,14 @@ public class PlantPlacerRuntime : MonoBehaviour
 
     private void Start()
     {
+        vegetationPlacer = new VegetationPlacer();
         StartCoroutine(RegenerateTiles());
         //SynchronousRegenerateTiles();
         StartCoroutine(PlaceTrees());
 
-        OnLandscapeUpdated(new Vector2Int((int)tileWidth/2, (int)tileWidth/2));
-        vegetationPlacer = new VegetationPlacer();
+        //OnLandscapeUpdated(new Vector2Int((int)tileWidth/2, (int)tileWidth/2));
+        ScanWholeMap();
+        
     }
 
     private void SynchronousRegenerateTiles()
@@ -88,10 +90,10 @@ public class PlantPlacerRuntime : MonoBehaviour
     private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults)
     {
         Debug.Log($"Tile co-ords: {updateTile}");
-        var tileWorldOrigin = new Vector2(updateTile.x + (tileWidth / 2), updateTile.y + (tileWidth / 2));
+        var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y);
         //var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
 
-        var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, tileWorldOrigin);
+        var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth/2, tileWorldOrigin);
 
         queuedTreePlacements.AddRange(worldPositions);
     }
@@ -134,6 +136,19 @@ public class PlantPlacerRuntime : MonoBehaviour
         }
         
         return heightMap;
+    }
+
+    private void ScanWholeMap()
+    {
+        int halfTileWidth = (int) tileWidth / 2;
+        Vector3 dimensions = targetTerrain.terrainData.size;
+        for (var x = 0; x < dimensions.x / tileWidth; x++)
+        {
+            for (var y = 0; y < dimensions.z / tileWidth; y++)
+            {
+                OnLandscapeUpdated(new Vector2Int((x * (int) tileWidth) + halfTileWidth, (y * (int) tileWidth) + halfTileWidth));
+            }
+        }
     }
 
     private List<Vector2> queuedTreePlacements = new List<Vector2>();

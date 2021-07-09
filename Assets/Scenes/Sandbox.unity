@@ -325,6 +325,7 @@ GameObject:
   - component: {fileID: 1646306714}
   - component: {fileID: 1646306713}
   - component: {fileID: 1646306717}
+  - component: {fileID: 1646306718}
   m_Layer: 0
   m_Name: Player editable terrain
   m_TagString: Untagged
@@ -339,7 +340,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646306712}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 452c786e675c84514a438b8f991660ab, type: 3}
   m_Name: 
@@ -422,4 +423,20 @@ MonoBehaviour:
   targetTerrain: {fileID: 1646306715}
   spawnableTreePrefab: {fileID: 7621256522460385180, guid: d80e49c4e21f9475b96446d67c7c466c, type: 3}
   vegetationPlacer:
-    VegThreshold: 0
+    VegThreshold: 0.2
+--- !u!114 &1646306718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646306712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4fa03e854de81c46b6dc233b3013a2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model: {fileID: 11400000, guid: df790a84a96767b4eababa34cecc2d26, type: 2}
+  tileWidthInWorldUnits: 200
+  proximityGradientWidthInTexels: 25
+  numberOfDioramaSamples: 25
