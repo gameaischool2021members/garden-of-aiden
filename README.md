@@ -16,20 +16,25 @@ You need Unity version 2020.3.7f1 installed and install requirements.txt placed 
 
 
 ```bash
-    git clone https://github.com/gameaischool2021members/garden-of-aiden
+$ git clone https://github.com/gameaischool2021members/garden-of-aiden
 ```
 
 From the Assets\ModelTraining directory
 ```bash
-python -m venv .venv
+$ python -m venv .venv
+```
+
+Activate the environment
+```bash
+$ .venv\\Scripts\\activate
 ```
 
 ```bash
-pip install -r Assets/ModelTraining/requirements.txt
+(.venv) $ pip install -r Assets/ModelTraining/requirements.txt
 ```
 
 ```bash 
-pip install -e .
+(.venv) $ pip install -e .
 ```
 
 ### Configuration
