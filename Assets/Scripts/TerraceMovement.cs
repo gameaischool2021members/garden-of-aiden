@@ -118,8 +118,10 @@ public class TerraceMovement : MonoBehaviour
     {
         var plantPlacer = GetComponent<PlantPlacerRuntime>();
         var targetTileFloat = relativeTerrainOffset / plantPlacer.tileWidth;
-        var targetTile = new Vector2Int(Mathf.RoundToInt(targetTileFloat.x), Mathf.RoundToInt(targetTileFloat.y));
-        plantPlacer.OnLandscapeUpdated(targetTile);
+        var targetTile = (new Vector2(Mathf.Floor(targetTileFloat.x), Mathf.Floor(targetTileFloat.y)) + Vector2.one * 0.5f) * plantPlacer.tileWidth;
+        var targetTileInt = new Vector2Int((int)targetTile.x, (int)targetTile.y);
+        Debug.LogFormat("Updating landscape at {0}", targetTileInt);
+        plantPlacer.OnLandscapeUpdated(targetTileInt);
     }
 
     private bool mouseIsDown = false;

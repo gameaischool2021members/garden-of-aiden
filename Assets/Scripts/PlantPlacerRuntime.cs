@@ -28,6 +28,7 @@ public class PlantPlacerRuntime : MonoBehaviour
 
     public void OnLandscapeUpdated(Vector2Int tileIndex)
     {
+        Debug.LogFormat("Generating tile {0}", tileIndex);
         // clear any existing queued instances of this tile
         RemoveExistingQueuedTileGenerations(tileIndex);
         EnqueueTileGeneration(tileIndex);
@@ -91,9 +92,14 @@ public class PlantPlacerRuntime : MonoBehaviour
 
             pythonRunner.StartGenerating(CollectHeightMapAtTile(thisUpdateTile));
 
-            Debug.Log("Polling for generated tile...");
             yield return new WaitUntil(() => pythonRunner.PollTileGenerationComplete());
-            Debug.Log("Generated tile!");
+
+            // maybe the player has queued another generation for this space?
+            if (queuedUpdates.Contains(thisUpdateTile))
+            {
+                // discard the results from this generation
+                continue;
+            }
 
             var tileGenerationResults = pythonRunner.CachedPreviousResult;
             EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions);
@@ -115,8 +121,15 @@ public class PlantPlacerRuntime : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitUntil(() => queuedTreePlacements.Count > 0);
             yield return new WaitForSeconds(timeBetweenTreePlacements);
+            yield return new WaitUntil(() => queuedTreePlacements.Count > 0);
+
+            // the player might have destroyed the last tree placement by requesting a new generation for this tile
+            // this can slip in inbetween the WaitUntil and this coroutine's execution
+            if (queuedTreePlacements.Count == 0)
+            {
+                continue;
+            }
 
             var thisNewTree = queuedTreePlacements.First();
             queuedTreePlacements.RemoveAt(0);
@@ -179,6 +192,4 @@ public class PlantPlacerRuntime : MonoBehaviour
             }
         }
     }
-
-    private List<Vector2> queuedTreePlacements = new List<Vector2>();
 }
