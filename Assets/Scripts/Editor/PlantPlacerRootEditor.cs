@@ -29,7 +29,7 @@ public class PlantPlacerRootEditor : Editor
     {
         var startInfo = new ProcessStartInfo();
 
-        startInfo.FileName = PlantPlacerPythonRunner.testPathToPython;
+        startInfo.FileName = PlantPlacerPythonRunner.pathToPythonEnv;
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,

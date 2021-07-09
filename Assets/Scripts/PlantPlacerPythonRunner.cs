@@ -24,18 +24,15 @@ public class PlantPlacerPythonRunner
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "Inference.py");
 
-    // uncomment the one you want
 
-    // Sam
-    public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
+    public static readonly string pathToPythonEnv = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
 
-    // Anthony
-    // public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
+
 
     public static readonly string relativeModelPath = "saved_model.keras";
     private void StartProcess()
     {
-        var startInfo = new ProcessStartInfo(testPathToPython);
+        var startInfo = new ProcessStartInfo(pathToPythonEnv);
         var fullPathToPython = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativePythonScriptPath);
         var fullPathToModel = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativeModelPath);
         startInfo.Arguments = String.Join(" ", new String[]{

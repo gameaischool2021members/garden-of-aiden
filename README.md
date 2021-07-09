@@ -11,7 +11,7 @@ Live design tool for nature placement. It can be understand as a tool for enviro
  2. Open the project in Unity. The version used to develop the app was 2020.3.13f1.
  
  Clone the repository .
-You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. 
+You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. Tested using pip with a Python 3.8 venv.
 
 ```bash
     git clone https://github.com/gameaischool2021members/garden-of-aiden
@@ -20,8 +20,16 @@ You need Unity version 2020.3.7f1 installed and install requirements.txt placed 
 ```bash
 pip install -r https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Assets/ModelTraining/requirements.txt
 ```
- 
- ## Instructions for training
+```bash 
+pip install -e <path to Assets/ModelTraining folder>
+```
+
+### Configuration
+1. Define the path to your python venv .exe inside of Assets\Scripts\PlantPlacerPythonRunner.cs (pathToPythonEnv).
+2. Specify the path to a custom saved model inside of Assets\Scripts\PlantPlacerPythonRunner.cs (relativeModelPath).
+
+
+## Instructions for training
 
 1. From **diorama** scene, using the root training component set **size and number of samples** param. Press start training in editor, workout outside of play mode. 
 
