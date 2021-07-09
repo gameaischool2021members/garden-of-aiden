@@ -18,14 +18,13 @@ public class PlantPlacerRootEditor : Editor
         if (GUILayout.Button("Start training"))
         {
             UnityEngine.Debug.LogFormat("Starting training");
-            var trainedModel = TrainModel();
-            SaveToModelAsset(trainedModel, TargetModel);
+            TrainModel();
         }
     }
 
     private static readonly string relativePythonScriptPath = Path.Combine("Assets", "ModelTraining", "TrainModel.py");
     private const int modelTrainingTimeout = 500000000;
-    private float TrainModel()
+    private void TrainModel()
     {
         var startInfo = new ProcessStartInfo();
 
@@ -67,14 +66,6 @@ public class PlantPlacerRootEditor : Editor
                 process.Kill();
             }
         }
-
-        //var outputString = process.StandardOutput.ReadToEnd();
-
-        //ReportSubProcessOutputs(process, "Python ML");
-
-        // Debug implementation
-        //var output = float.Parse(outputString);
-        return 1f;
     }
 
     private void OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -116,6 +107,7 @@ public class PlantPlacerRootEditor : Editor
 
             // collect data
             var treeProximityMap = scanner.ScanForTrees(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
+            var bushProximityMap = scanner.ScanForBushes(centerPoint, TargetComponent.tileWidthInWorldUnits / 2f, TargetComponent.proximityGradientWidthInTexels);
 
             var heightMap = new float[heightMapResolution, heightMapResolution];
             var cornerOrigin2d = centerPoint - Vector2.one * TargetComponent.tileWidthInWorldUnits / 2f;
@@ -136,6 +128,9 @@ public class PlantPlacerRootEditor : Editor
 
             stdInput.WriteLine("plants");
             WriteMap(treeProximityMap, stdInput);
+
+            stdInput.WriteLine("bushes");
+            WriteMap(bushProximityMap, stdInput);
 
             stdInput.WriteLine("heights");
             WriteMap(heightMap, stdInput);
@@ -184,11 +179,6 @@ public class PlantPlacerRootEditor : Editor
     private static void ReportSubProcessOutputs(Process process, string processIdentifier, LogOrError treatErrorsAs = LogOrError.Error)
     {
         DoIfAnyNonEmptyStrings(process.StandardError.ReadToEnd(), formattedOutput => ConditionalOutputStreamLog(treatErrorsAs, "{0} error:\n{1}\n\n\n", processIdentifier, formattedOutput));
-    }
-
-    private void SaveToModelAsset(float param, PlantPlacerModel outputModel)
-    {
-        outputModel.placerParameter = param;
     }
 
     private PlantPlacerRoot TargetComponent =>

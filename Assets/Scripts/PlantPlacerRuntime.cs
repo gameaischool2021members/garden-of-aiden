@@ -16,6 +16,8 @@ public class PlantPlacerRuntime : MonoBehaviour
 
     [SerializeField]
     private GameObject[] spawnableTreePrefab = null;
+    [SerializeField]
+    private GameObject[] spawnableBushPrefab = null;
 
     [SerializeField]
     private VegetationPlacer vegetationPlacer;
@@ -58,26 +60,9 @@ public class PlantPlacerRuntime : MonoBehaviour
     {
         vegetationPlacer = new VegetationPlacer();
         StartCoroutine(RegenerateTiles());
-        //SynchronousRegenerateTiles();
         StartCoroutine(PlaceTrees());
 
-        //OnLandscapeUpdated(new Vector2Int((int)tileWidth/2, (int)tileWidth/2));
         ScanWholeMap();
-        
-    }
-
-    private void SynchronousRegenerateTiles()
-    {
-        var pythonRunner = new PlantPlacerPythonRunner(model);
-
-        var thisUpdateTile = Vector2Int.zero;
-
-        pythonRunner.StartGenerating(CollectHeightMapAtTile(thisUpdateTile));
-
-        while(!pythonRunner.PollTileGenerationComplete());
-
-        var tileGenerationResults = pythonRunner.CachedPreviousResult;
-        EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions);
     }
 
     private IEnumerator RegenerateTiles()
@@ -102,11 +87,18 @@ public class PlantPlacerRuntime : MonoBehaviour
             }
 
             var tileGenerationResults = pythonRunner.CachedPreviousResult;
-            EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions);
+            EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions, VegType.Tree);
+            EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeBushPositions, VegType.Bush);
         }
     }
 
-    private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults)
+    private enum VegType
+    {
+        Tree,
+        Bush,
+    }
+
+    private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults, VegType vegType)
     {
         Debug.Log($"Tile co-ords: {updateTile}");
         var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y);
@@ -114,7 +106,7 @@ public class PlantPlacerRuntime : MonoBehaviour
 
         var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth/2, tileWorldOrigin);
 
-        queuedTreePlacements.AddRange(worldPositions.Select(treePos => new QueuedTreePlacement{tile=updateTile, treePos=treePos}));
+        queuedTreePlacements.AddRange(worldPositions.Select(treePos => new QueuedTreePlacement{tile=updateTile, treePos=treePos, vegType=vegType}));
     }
 
     private IEnumerator PlaceTrees()
@@ -134,16 +126,17 @@ public class PlantPlacerRuntime : MonoBehaviour
             var thisNewTree = queuedTreePlacements.First();
             queuedTreePlacements.RemoveAt(0);
 
-            SpawnTree(thisNewTree.tile, thisNewTree.treePos);
+            SpawnTree(thisNewTree.tile, thisNewTree.treePos, thisNewTree.vegType);
         }
     }
 
-    private void SpawnTree(Vector2Int tile, Vector2 treeXzPosition)
+    private void SpawnTree(Vector2Int tile, Vector2 treeXzPosition, VegType vegType)
     {
         var treeXzPosition3 = new Vector3(treeXzPosition[0], 0f, treeXzPosition[1]);
         var height = targetTerrain.SampleHeight(treeXzPosition3);
         var treePosition = treeXzPosition3 + Vector3.up * height;
-        var spawnedTree = Object.Instantiate(selectRandomTree(), treePosition, Quaternion.Euler(new Vector3(0, Random.Range(0f, 360f), 0)));
+        var objectToSpawn = (vegType == VegType.Tree ? selectRandomTree() : selectRandomBush());
+        var spawnedTree = Object.Instantiate(objectToSpawn, treePosition, Quaternion.Euler(new Vector3(0, Random.Range(0f, 360f), 0)));
 
         if (!tileTreeDict.ContainsKey(tile))
         {
@@ -157,6 +150,12 @@ public class PlantPlacerRuntime : MonoBehaviour
     {
         var index = Random.Range(0, spawnableTreePrefab.Length);
         return spawnableTreePrefab[index];
+    }
+
+    private GameObject selectRandomBush()
+    {
+        var index = Random.Range(0, spawnableBushPrefab.Length);
+        return spawnableBushPrefab[index];
     }
 
     private float[,] CollectHeightMapAtTile(Vector2Int centerPoint)
@@ -182,6 +181,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     {
         public Vector2Int tile;
         public Vector2 treePos;
+        public VegType vegType;
     }
     private List<QueuedTreePlacement> queuedTreePlacements = new List<QueuedTreePlacement>();
 

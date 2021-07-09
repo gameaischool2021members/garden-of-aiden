@@ -22165,7 +22165,7 @@ MonoBehaviour:
   model: {fileID: 11400000, guid: df790a84a96767b4eababa34cecc2d26, type: 2}
   tileWidthInWorldUnits: 200
   proximityGradientWidthInTexels: 25
-  numberOfDioramaSamples: 25
+  numberOfDioramaSamples: 1000
 --- !u!1001 &1900904600
 PrefabInstance:
   m_ObjectHideFlags: 0
