@@ -15,9 +15,9 @@ This tool learns at design time how to place plants based on the environment. Wh
 ### AI Core
 We are using a customized GAN to learn the desired pattern and rules of the artist initially. After the training is finished, we can use the model to predict the vegetation of the desired terrain which can be modified during the runtime.
 The inputs of the system are the terrain height-map and the current plants textures.
-![System description]("./Readme Pictures/System Description.png")
+![System description](https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/System%20Description.png)
 #### An example
-![A training example]("./Readme Pictures/AI Example.png")
+![A training example](https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/AI%20Example.png)
 The first row of this picture show the height-maps.
 And the last row is the final outputs of the system with two kinds of plants.
 
