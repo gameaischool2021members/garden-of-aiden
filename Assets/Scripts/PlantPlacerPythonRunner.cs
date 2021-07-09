@@ -32,7 +32,7 @@ public class PlantPlacerPythonRunner
     // Anthony
     // public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
 
-    public static readonly string relativeModelPath = "saved_model.keras";
+    public static readonly string relativeModelPath = "first_training_pass.h5";
     private void StartProcess()
     {
         var startInfo = new ProcessStartInfo(testPathToPython);

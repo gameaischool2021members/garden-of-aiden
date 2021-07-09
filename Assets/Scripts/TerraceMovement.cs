@@ -19,35 +19,43 @@ public class TerraceMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (mouseIsDown)
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider != null)
+                {
+                    // find the heightmap position of hit for putting it OnMouseDown
+                    float relativeHitTerX = (hit.point.x - terrain.transform.position.x) / terrain.terrainData.size.x;
+                    float relativeHitTerZ = (hit.point.z - terrain.transform.position.z) / terrain.terrainData.size.z;
 
+                    float relativeTerCoordX = terrain.terrainData.heightmapResolution * relativeHitTerX;
+                    float relativeTerCoordZ = terrain.terrainData.heightmapResolution * relativeHitTerZ;
+
+                    int hitPointTerX = Mathf.FloorToInt(relativeTerCoordX);
+                    int hitPointTerZ = Mathf.FloorToInt(relativeTerCoordZ);
+
+                    float[,] heights = terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution);
+
+                    AddRadialGradient(ref heights, new Vector2Int(hitPointTerZ, hitPointTerX), Time.deltaTime);
+
+                    terrain.terrainData.SetHeights(0, 0, heights);
+                    terrain.terrainData.SyncHeightmap();
+                }
+            }
+        }
     }
-
 
     private void OnMouseDown()
     {
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-            if (hit.collider != null)
-            {
-                // find the heightmap position of hit for putting it OnMouseDown
-                float relativeHitTerX = (hit.point.x - terrain.transform.position.x) / terrain.terrainData.size.x;
-                float relativeHitTerZ = (hit.point.z - terrain.transform.position.z) / terrain.terrainData.size.z;
+        mouseIsDown = true;
+    }
 
-                float relativeTerCoordX = terrain.terrainData.heightmapResolution * relativeHitTerX;
-                float relativeTerCoordZ = terrain.terrainData.heightmapResolution * relativeHitTerZ;
-
-                int hitPointTerX = Mathf.FloorToInt(relativeTerCoordX);
-                int hitPointTerZ = Mathf.FloorToInt(relativeTerCoordZ);
-
-                float[,] heights = terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution);
-
-                AddRadialGradient(ref heights, new Vector2Int(hitPointTerZ, hitPointTerX));
-
-                terrain.terrainData.SetHeights(0, 0, heights);
-                terrain.terrainData.SyncHeightmap();
-
-            }
+    private void OnMouseUp()
+    {
+        mouseIsDown = false;
     }
 
 
@@ -67,7 +75,7 @@ public class TerraceMovement : MonoBehaviour
         terrain.terrainData.SetHeights(0, 0, heights);
     }
 
-    private void AddRadialGradient(ref float[,] heights, Vector2Int center)
+    private void AddRadialGradient(ref float[,] heights, Vector2Int center, float deltaTime)
     {
         var brushRadiusInt = (int)Mathf.Ceil(brushRadius);
         for (var xOffset = -brushRadiusInt; xOffset < brushRadiusInt; ++xOffset)
@@ -86,7 +94,7 @@ public class TerraceMovement : MonoBehaviour
                     continue;
                 }
 
-                var radialHeightChange = CalculateRadialGradientAtOffset(xOffset, yOffset) * heightChange;
+                var radialHeightChange = CalculateRadialGradientAtOffset(xOffset, yOffset) * heightChange * deltaTime;
                 heights[texelX, texelY] += radialHeightChange;
             }
         }
@@ -100,6 +108,6 @@ public class TerraceMovement : MonoBehaviour
         var impact = (cosResult + 1f) * 0.5f;
         return impact;
     }
+
+    private bool mouseIsDown = false;
 }    
-
-
