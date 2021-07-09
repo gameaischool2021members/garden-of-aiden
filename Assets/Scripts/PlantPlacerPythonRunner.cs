@@ -29,7 +29,7 @@ public class PlantPlacerPythonRunner
 
 
 
-    public static readonly string relativeModelPath = "saved_model.keras";
+    public static readonly string relativeModelPath = "quirin_bushes.h5";
     private void StartProcess()
     {
         var startInfo = new ProcessStartInfo(pathToPythonEnv);
