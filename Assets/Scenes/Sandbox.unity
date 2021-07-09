@@ -364,6 +364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 1646306715}
+  terrainData: {fileID: 15600000, guid: 08cd509aeb7584706862bf97ae4cb49e, type: 2}
   heightChange: 0.1
   brushRadius: 20
 --- !u!154 &1646306714
@@ -442,13 +443,11 @@ MonoBehaviour:
   spawnableTreePrefab:
   - {fileID: 7621256522460385180, guid: d80e49c4e21f9475b96446d67c7c466c, type: 3}
   - {fileID: 4725101787582647881, guid: 7f2ba5049788442a0aed70bd6f74036c, type: 3}
-  - {fileID: 6001559889880526118, guid: f3b1c49ca98ad49d591ba4f697000207, type: 3}
-  spawnableBushPrefab:
-  - {fileID: 2244621927542206426, guid: c8025122670542a4cbac0af93051ba9c, type: 3}
-  spawnBushes: 1
+  - {fileID: 5234814410241415078, guid: b13d4b6a008bf4125a2707bfe73da643, type: 3}
+  - {fileID: 8564027664397903025, guid: 8afba361b8aa244db8f1566441a5d81c, type: 3}
   vegetationPlacer:
     VegThreshold: 0.2
-  timeBetweenTreePlacements: 0
+  timeBetweenTreePlacements: 0.00001
 --- !u!114 &1646306718
 MonoBehaviour:
   m_ObjectHideFlags: 0
