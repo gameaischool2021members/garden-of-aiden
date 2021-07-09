@@ -13,15 +13,23 @@ Live design tool for nature placement. It can be understand as a tool for enviro
  Clone the repository .
 You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. Tested using pip with a Python 3.8 venv. Using Nvidias CUDA compatible GPUs might require [cuDNN](https://developer.nvidia.com/cudnn).
 
+
+
 ```bash
     git clone https://github.com/gameaischool2021members/garden-of-aiden
+```
+
+From the Assets\ModelTraining directory
+```bash
+python -m venv .venv
 ```
 
 ```bash
 pip install -r Assets/ModelTraining/requirements.txt
 ```
+
 ```bash 
-pip install -e <path to Assets/ModelTraining folder>
+pip install -e .
 ```
 
 ### Configuration
