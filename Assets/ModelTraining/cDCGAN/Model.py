@@ -211,7 +211,7 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 
 
 # train models
-def train(d_model, g_model, gan_model, dataset, n_epochs=1, n_batch=1, augmented=False):
+def train(d_model, g_model, gan_model, dataset, n_epochs=1, n_batch=32, augmented=False):
 	# determine the output square shape of the discriminator
 	n_patch = d_model.output_shape[1]
 
@@ -321,6 +321,7 @@ class ModelRunner:
 		self.model = load_data_and_train(dataset, epochs, generator_model=self.model)
 		
 	def listen(self):
+		print("listening")
 		while(True):
 			sleep(0.1)
 			dataset = Pipeline.collect_inference_data()
@@ -336,11 +337,10 @@ def print_serialized_arr(numpy_arr):
 	# numpy_arr.shape is (1, 256, 256, 3)
 	first_element = numpy_arr[0]
 	# select last channel out of the array and remove its channel dimension: (256, 256, 3) -> (256, 256)
-	first_element = np.squeeze(np.split(first_element, first_element.shape[-1], -1), axis=-1)
+	first_element = first_element[:, :, 0]
 	for row in first_element:
-		for col in row:
-			print(col, ' ', end='')
-		print()
+		print(' '.join(str(val) for val in row))
+	print()
 	pass
 
 # for rapid testing with different data shapes

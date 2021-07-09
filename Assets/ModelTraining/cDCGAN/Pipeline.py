@@ -12,11 +12,13 @@ class TrainingInstance():
 def collect_inference_data() -> List[TrainingInstance]:
   inference_data = []
 
+  print("collecting inference data")
   for line in sys.stdin:
     if 'finish'==line.rstrip():
       break
 
     if 'begin_inference_instance' == line.rstrip():
+      print("found start of inference instance")
       serialized_inference_instance = []
       for line in (line.rstrip() for line in sys.stdin):
         if 'end_inference_instance'==line:
@@ -26,7 +28,9 @@ def collect_inference_data() -> List[TrainingInstance]:
       inference_instace = parse_training_data(serialized_inference_instance)
 
       inference_data += [inference_instace]
+      print("collected inference instance")
 
+  print("finished collecting inference data")
   return inference_data
     
 

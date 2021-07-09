@@ -3,8 +3,6 @@ from argparse import *
 from cDCGAN import Model
 
 def main():
-    print('hi pre argparse')
-
     parser = ArgumentParser(description='Load model from filesystem and use for inference')
     parser.add_argument('--model', help='The path to the .h5 stored model', required=True, type=str)
     args = parser.parse_args()
