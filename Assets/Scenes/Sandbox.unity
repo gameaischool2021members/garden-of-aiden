@@ -345,6 +345,7 @@ GameObject:
   - component: {fileID: 1646306714}
   - component: {fileID: 1646306713}
   - component: {fileID: 1646306717}
+  - component: {fileID: 1646306718}
   m_Layer: 0
   m_Name: Player editable terrain
   m_TagString: Untagged
@@ -402,7 +403,7 @@ Terrain:
   m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_MaterialTemplate: {fileID: -3963241562183589234, guid: f3f7ae18adc985240b7f24050cd99d63, type: 3}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -438,6 +439,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 11400000, guid: df790a84a96767b4eababa34cecc2d26, type: 2}
-  tileWidth: 10
+  tileWidth: 200
   targetTerrain: {fileID: 1646306715}
   spawnableTreePrefab: {fileID: 7621256522460385180, guid: d80e49c4e21f9475b96446d67c7c466c, type: 3}
+  vegetationPlacer:
+    VegThreshold: 0.2
+  timeBetweenTreePlacements: 0
+--- !u!114 &1646306718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646306712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4fa03e854de81c46b6dc233b3013a2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model: {fileID: 11400000, guid: df790a84a96767b4eababa34cecc2d26, type: 2}
+  tileWidthInWorldUnits: 200
+  proximityGradientWidthInTexels: 25
+  numberOfDioramaSamples: 25

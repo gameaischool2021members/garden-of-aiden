@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class PlantPlacerPythonRunner
 {
@@ -31,7 +32,7 @@ public class PlantPlacerPythonRunner
     // Anthony
     // public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
 
-    public static readonly string relativeModelPath = "first_training_pass.h5";
+    public static readonly string relativeModelPath = "saved_model.keras";
     private void StartProcess()
     {
         var startInfo = new ProcessStartInfo(testPathToPython);
@@ -39,7 +40,6 @@ public class PlantPlacerPythonRunner
         var fullPathToModel = Path.Combine(System.IO.Directory.GetCurrentDirectory(), relativeModelPath);
         startInfo.Arguments = String.Join(" ", new String[]{
             fullPathToPython,
-            "--",
             "--model", fullPathToModel,
         }.Select(arg => String.Format("\"{0}\"", arg)));
         startInfo.RedirectStandardInput = true;
@@ -61,6 +61,8 @@ public class PlantPlacerPythonRunner
 
     private void OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
+        UnityEngine.Debug.Log(e.Data);
+
         if (String.IsNullOrEmpty(e.Data))
         {
             return;
@@ -74,20 +76,16 @@ public class PlantPlacerPythonRunner
                 return;
             }
         }
-
-        if (!currentlyReading)
+        else
         {
             ReadLineToCachedArray(e.Data, readingIndex);
             ++readingIndex;
             if (ReachedEndOfData(readingIndex))
             {
-                cachedPreviousResult.relativeTreePositions = ConvertProximityMapIntoInstances(readingData);
+                cachedPreviousResult.relativeTreePositions = readingData;
+                ++lastGeneratedGeneration;
                 StopReading();
             }
-        }
-        else
-        {
-            UnityEngine.Debug.Log(e.Data);
         }
     }
 
@@ -104,18 +102,22 @@ public class PlantPlacerPythonRunner
 
     private void ReadLineToCachedArray(string dataLine, int lineIndex)
     {
-        var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
-
-        for(var xIndex = 0; xIndex < 256; ++xIndex)
+        try
         {
-            readingData[lineIndex, xIndex] = numbers[xIndex];
+            var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
+            Assert.IsTrue(numbers.Length >= 256);
+
+            for(var xIndex = 0; xIndex < 256; ++xIndex)
+            {
+                readingData[lineIndex, xIndex] = numbers[xIndex];
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError(e.Message);
         }
     }
 
-    static private List<Vector2> ConvertProximityMapIntoInstances(float[,] savedData)
-    {
-        return new List<Vector2>();
-    }
 
     public static void WriteMap(float[,] input, StreamWriter output)
     {
@@ -138,7 +140,13 @@ public class PlantPlacerPythonRunner
 
     public bool PollTileGenerationComplete()
     {
-        return true;
+        if (lastPolledGeneration != lastGeneratedGeneration)
+        {
+            lastPolledGeneration = lastGeneratedGeneration;
+            return true;
+        }
+
+        return false;
     }
 
     static private bool ShouldStartReading(string stdoutLine)
@@ -162,9 +170,12 @@ public class PlantPlacerPythonRunner
 
     public struct GenerationResult
     {
-        public List<Vector2> relativeTreePositions;
+        public float[,] relativeTreePositions;
     }
 
     public GenerationResult CachedPreviousResult => cachedPreviousResult;
     private GenerationResult cachedPreviousResult = new GenerationResult();
+
+    private int lastGeneratedGeneration = 0;
+    private int lastPolledGeneration = 0;
 }

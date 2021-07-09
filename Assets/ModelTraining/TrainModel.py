@@ -31,7 +31,7 @@ plants_prefix = 'plants'
 def train_on_data(training_data : List[TrainingInstance]):
   dataset = Pipeline.reshape_data_for_training(training_data)
 
-  generator_model = Model.load_data_and_train(dataset, epochs=100)
+  generator_model = Model.load_data_and_train(dataset, epochs=1)
   generator_model.save('.\saved_model.keras')
 
   # debug value to satisfy debug requirements from Unity

@@ -45,7 +45,7 @@ public class TreePlacerTest : MonoBehaviour
                 TreeParticles particles = tree.GetComponent<TreeParticles>();
                 if(particles != null)
                 {
-                    particles.DestroyTree();
+                    particles.BeginDestroyingTree();
                 }
                 Debug.Log("X: " + tree.transform.position.x + " Y: " + tree.transform.position.z);
                 Destroy(tree);
@@ -62,7 +62,7 @@ public class TreePlacerTest : MonoBehaviour
                 TreeParticles particles = bush.GetComponent<TreeParticles>();
                 if(particles != null)
                 {
-                    particles.DestroyTree();
+                    particles.BeginDestroyingTree();
                 }
                 Debug.Log("X: " + bush.transform.position.x + " Y: " + bush.transform.position.z);
                 Destroy(bush);
