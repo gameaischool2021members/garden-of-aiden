@@ -11,7 +11,7 @@ Live design tool for nature placement. It can be understand as a tool for enviro
  2. Open the project in Unity. The version used to develop the app was 2020.3.13f1.
  
  Clone the repository .
-You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. Tested using pip with a Python 3.8 venv.
+You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. Tested using pip with a Python 3.8 venv. Using Nvidias CUDA compatible GPUs might require [cuDNN](https://developer.nvidia.com/cudnn).
 
 ```bash
     git clone https://github.com/gameaischool2021members/garden-of-aiden
