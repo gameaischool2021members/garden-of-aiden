@@ -13,15 +13,28 @@ Live design tool for nature placement. It can be understand as a tool for enviro
  Clone the repository .
 You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. Tested using pip with a Python 3.8 venv. Using Nvidias CUDA compatible GPUs might require [cuDNN](https://developer.nvidia.com/cudnn).
 
+
+
 ```bash
-    git clone https://github.com/gameaischool2021members/garden-of-aiden
+$ git clone https://github.com/gameaischool2021members/garden-of-aiden
+```
+
+From the Assets\ModelTraining directory
+```bash
+$ python -m venv .venv
+```
+
+Activate the environment
+```bash
+$ .venv\\Scripts\\activate
 ```
 
 ```bash
-pip install -r https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Assets/ModelTraining/requirements.txt
+(.venv) $ pip install -r Assets/ModelTraining/requirements.txt
 ```
+
 ```bash 
-pip install -e <path to Assets/ModelTraining folder>
+(.venv) $ pip install -e .
 ```
 
 ### Configuration
@@ -31,7 +44,7 @@ pip install -e <path to Assets/ModelTraining folder>
 
 ## Instructions for training
  
-![Tool](https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Readme%20Pictures/tool.png)
+<img src="https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Readme%20Pictures/tool.png" height="500">
 
 1. From **diorama** scene, using the root training component set **size and number of samples** param. Press start training in editor, workout outside of play mode. 
 
@@ -51,13 +64,18 @@ pip install -e <path to Assets/ModelTraining folder>
 We are using a customized GAN to learn the desired pattern and rules of the artist initially. After the training is finished, we can use the model to predict the vegetation of the desired terrain which can be modified during the runtime.
 The inputs of the system are the terrain height-map and the current plants textures.
 
-![System description](https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/System%20Description.png)
+
+<img src="https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/System%20Description.png" height="500">
+
 
 #### An example
-![A training example](https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/AI%20Example.png)
 
-The first row of this picture show the height-maps.
+
+<img src="https://github.com/gameaischool2021members/garden-of-aiden/blob/5dba9c411a261e40e4cdf453d1c5058c3d06afbf/Readme%20Pictures/AI%20Example.png" height="300">
+
+The first row of this picture show the **height-maps**.
 And the last row is the final outputs of the system with two kinds of plants.
+Each one of the columns corresponds with samples 
 
 ### Unity Interface
 The user can edit the terrain at runtime, and the changes to the vegetation will be applied.
