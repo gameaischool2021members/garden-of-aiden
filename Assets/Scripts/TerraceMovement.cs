@@ -6,6 +6,7 @@ using UnityEngine;
 public class TerraceMovement : MonoBehaviour
 {
     public Terrain terrain;
+    public bool loadFromData;
     public TerrainData terrainData;
     public float heightChange = 1.0f;
     public float brushRadius = 20.0f;
@@ -13,10 +14,15 @@ public class TerraceMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (terrainData == null)
-            ResetTerrain();
-        else
-            terrain.terrainData.SetHeights(0, 0, terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution) );
+
+        if (loadFromData) 
+        {
+            if (terrainData == null)
+                ResetTerrain();
+            else
+                terrain.terrainData.SetHeights(0, 0, terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution));
+        }
+       
     }
 
     // Update is called once per frame
