@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -445,7 +445,7 @@ MonoBehaviour:
   - {fileID: 6001559889880526118, guid: f3b1c49ca98ad49d591ba4f697000207, type: 3}
   spawnableBushPrefab:
   - {fileID: 2244621927542206426, guid: c8025122670542a4cbac0af93051ba9c, type: 3}
-  spawnBushes: 0
+  spawnBushes: 1
   vegetationPlacer:
     VegThreshold: 0.2
   timeBetweenTreePlacements: 0
