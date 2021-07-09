@@ -69,7 +69,36 @@ public class TerraceMovement : MonoBehaviour
 
     private void AddRadialGradient(ref float[,] heights, Vector2Int center)
     {
-        heights[center.x, center.y] += heightChange;
+        var brushRadiusInt = (int)Mathf.Ceil(brushRadius);
+        for (var xOffset = -brushRadiusInt; xOffset < brushRadiusInt; ++xOffset)
+        {
+            var texelX = center.x + xOffset;
+            if (texelX < 0 || texelX >= heights.GetLength(0))
+            {
+                continue;
+            }
+
+            for (var yOffset = -brushRadiusInt; yOffset < brushRadiusInt; ++yOffset)
+            {
+                var texelY = center.y + yOffset;
+                if (texelY < 0 || texelY >= heights.GetLength(1))
+                {
+                    continue;
+                }
+
+                var radialHeightChange = CalculateRadialGradientAtOffset(xOffset, yOffset) * heightChange;
+                heights[texelX, texelY] += radialHeightChange;
+            }
+        }
+    }
+
+    private float CalculateRadialGradientAtOffset(int xOffset, int yOffset)
+    {
+        var distance = Mathf.Sqrt(xOffset * xOffset + yOffset * yOffset);
+        var t = Mathf.InverseLerp(0f, brushRadius, distance);
+        var cosResult = Mathf.Cos(t * Mathf.PI);
+        var impact = (cosResult + 1f) * 0.5f;
+        return impact;
     }
 }    
 

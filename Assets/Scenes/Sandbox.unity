@@ -365,7 +365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 1646306715}
-  heightChange: 0.1
+  heightChange: 0.01
   brushRadius: 20
 --- !u!154 &1646306714
 TerrainCollider:
