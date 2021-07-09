@@ -30,6 +30,10 @@ pip install -e <path to Assets/ModelTraining folder>
 
 
 ## Instructions for training
+ 
+ ## Instructions for training
+ 
+ ![Tool](https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Readme%20Pictures/tool.png)
 
 1. From **diorama** scene, using the root training component set **size and number of samples** param. Press start training in editor, workout outside of play mode. 
 
