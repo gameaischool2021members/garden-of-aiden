@@ -329,15 +329,16 @@ class ModelRunner:
 				output = self.infer(dataset)
 				#serialized_out = pickle.dumps(output, protocol=0)
 				print('TreeProxMap')
-				print_serialized_arr(output)
+				print_serialized_arr(output, 0)
+				print_serialized_arr(output, 2)
 				# serialize & sent output to stdout
 
 
-def print_serialized_arr(numpy_arr):
+def print_serialized_arr(numpy_arr, channel):
 	# numpy_arr.shape is (1, 256, 256, 3)
 	first_element = numpy_arr[0]
 	# select last channel out of the array and remove its channel dimension: (256, 256, 3) -> (256, 256)
-	first_element = first_element[:, :, 0]
+	first_element = first_element[:, :, channel]
 	for row in first_element:
 		print(' '.join(str(val) for val in row))
 	print('', flush=True)

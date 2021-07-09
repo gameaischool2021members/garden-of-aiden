@@ -4,8 +4,9 @@ import sys
 import matplotlib.pyplot as plt
 
 class TrainingInstance():
-  def __init__(self, plant_data : numpy.ndarray, height_data : numpy.ndarray):
+  def __init__(self, plant_data : numpy.ndarray, bush_data : numpy.ndarray, height_data : numpy.ndarray):
     self.plant_data = plant_data
+    self.bush_data = bush_data
     self.height_data = height_data
     pass
 
@@ -52,7 +53,7 @@ def collect_training_data() -> List[TrainingInstance]:
 
       training_data += [training_instance]
 
-  DEBUG_plot_first_instance(training_data)
+  #DEBUG_plot_first_instance(training_data)
   return training_data
 
 def DEBUG_plot_first_instance(training_data):
@@ -65,16 +66,9 @@ def DEBUG_plot_first_instance(training_data):
   plt.imshow(training_instance.height_data, cmap='hot')
   plt.show()
 
-def parse_plants_data(input_stream) -> numpy.ndarray:
-  row_list = []
-  for line in input_stream.stdin:
-    if line.rstrip() == 'end':
-      break
-    row_list += [numpy.fromstring(line)]
-  return row_list
-
 def parse_training_data(training_data_serialized : List[str]) -> TrainingInstance:
   plant_data = None
+  bush_data = None
   height_data = None
 
   line_index = 0
@@ -86,11 +80,15 @@ def parse_training_data(training_data_serialized : List[str]) -> TrainingInstanc
       plant_data = parse_serialized_numpy_array(training_data_serialized[line_index : line_index + 256])
       line_index += 256
 
+    if this_line == 'bushes':
+      bush_data = parse_serialized_numpy_array(training_data_serialized[line_index : line_index + 256])
+      line_index += 256
+
     if this_line == 'heights':
       height_data = parse_serialized_numpy_array(training_data_serialized[line_index : line_index + 256])
       line_index += 256
 
-  return TrainingInstance(plant_data, height_data)
+  return TrainingInstance(plant_data, bush_data, height_data)
 
 
 def parse_serialized_numpy_array(serialized_numpy_data : List[str]) -> numpy.ndarray:
@@ -114,9 +112,11 @@ def reshape_data_for_training(training_data: List[TrainingInstance]) -> List[num
   # split training instances
   input_data_height = [] # Height input channel
   example_data_plant = [] # Plant real output channel
+  example_data_bush = [] # Plant real output channel
   for i in range(len(training_data)):
     input_data_height.append(training_data[i].height_data)
     example_data_plant.append(training_data[i].plant_data)
+    example_data_bush.append(training_data[i].bush_data)
 
   # convert to numpy arrays
   input_data_height = numpy.expand_dims(numpy.stack(input_data_height, axis=0), axis= -1)
@@ -124,6 +124,8 @@ def reshape_data_for_training(training_data: List[TrainingInstance]) -> List[num
   input_data = numpy.broadcast_to(input_data_height, (input_data_height_shape[0], input_data_height_shape[1], input_data_height_shape[2], 3)).copy()
 
   example_data_plant = numpy.expand_dims(numpy.stack(example_data_plant, axis=0), axis= -1)
+  example_data_bush = numpy.expand_dims(numpy.stack(example_data_bush, axis=0), axis= -1)
   example_data_plant_shape = example_data_plant.shape
-  example_data = numpy.broadcast_to(example_data_plant, (example_data_plant_shape[0], example_data_plant_shape[1], example_data_plant_shape[2], 3)).copy()
+  example_data = numpy.concatenate([numpy.tile(example_data_plant, (1,1,1,2,)), example_data_bush], 3)
+  print(example_data.shape)
   return [input_data, example_data]
