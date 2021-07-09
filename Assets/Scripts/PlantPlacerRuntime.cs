@@ -41,6 +41,16 @@ public class PlantPlacerRuntime : MonoBehaviour
     private void RemoveExistingQueuedTileGenerations(Vector2Int tileIndex)
     {
         queuedUpdates.RemoveAll(tile => tile == tileIndex);
+        queuedTreePlacements.RemoveAll(pendingTree => pendingTree.tile == tileIndex);
+
+        if (tileTreeDict.TryGetValue(tileIndex, out var spawnedTrees))
+        {
+            foreach (var spawnedTree in spawnedTrees)
+            {
+                spawnedTree.GetComponent<TreeParticles>().BeginDestroyingTree();
+            }
+        }
+        tileTreeDict.Remove(tileIndex);
     }
 
     private void Start()
@@ -96,7 +106,7 @@ public class PlantPlacerRuntime : MonoBehaviour
 
         var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, tileWorldOrigin);
 
-        queuedTreePlacements.AddRange(worldPositions);
+        queuedTreePlacements.AddRange(worldPositions.Select(treePos => new QueuedTreePlacement{tile=updateTile, treePos=treePos}));
     }
 
     private IEnumerator PlaceTrees()
@@ -109,16 +119,23 @@ public class PlantPlacerRuntime : MonoBehaviour
             var thisNewTree = queuedTreePlacements.First();
             queuedTreePlacements.RemoveAt(0);
 
-            SpawnTree(thisNewTree);
+            SpawnTree(thisNewTree.tile, thisNewTree.treePos);
         }
     }
 
-    private void SpawnTree(Vector2 treeXzPosition)
+    private void SpawnTree(Vector2Int tile, Vector2 treeXzPosition)
     {
         var treeXzPosition3 = new Vector3(treeXzPosition[0], 0f, treeXzPosition[1]);
         var height = targetTerrain.SampleHeight(treeXzPosition3);
         var treePosition = treeXzPosition3 + Vector3.up * height;
-        Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
+        var spawnedTree = Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
+
+        if (!tileTreeDict.ContainsKey(tile))
+        {
+            tileTreeDict.Add(tile, new List<GameObject>());
+        }
+        var tileSpawnedTrees = tileTreeDict[tile];
+        tileSpawnedTrees.Add(spawnedTree);
     }
 
     private float[,] CollectHeightMapAtTile(Vector2Int centerPoint)
@@ -140,5 +157,12 @@ public class PlantPlacerRuntime : MonoBehaviour
         return heightMap;
     }
 
-    private List<Vector2> queuedTreePlacements = new List<Vector2>();
+    private struct QueuedTreePlacement
+    {
+        public Vector2Int tile;
+        public Vector2 treePos;
+    }
+    private List<QueuedTreePlacement> queuedTreePlacements = new List<QueuedTreePlacement>();
+
+    private Dictionary<Vector2Int, List<GameObject>> tileTreeDict = new Dictionary<Vector2Int, List<GameObject>>();
 }
