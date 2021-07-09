@@ -78,6 +78,7 @@ public class PlantPlacerPythonRunner
         else
         {
             ReadLineToCachedArray(e.Data, readingIndex);
+            UnityEngine.Debug.LogFormat("Read line {0}", readingIndex);
             ++readingIndex;
             if (ReachedEndOfData(readingIndex))
             {
