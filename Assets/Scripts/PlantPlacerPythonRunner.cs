@@ -32,7 +32,7 @@ public class PlantPlacerPythonRunner
     // Anthony
     // public static readonly string testPathToPython = Path.GetFullPath("Assets\\ModelTraining\\.venv\\Scripts\\python.exe");
 
-    public static readonly string relativeModelPath = "quirin_bushes.h5";
+    public static readonly string relativeModelPath = "saved_model.keras";
     private void StartProcess()
     {
         var startInfo = new ProcessStartInfo(testPathToPython);
@@ -78,19 +78,11 @@ public class PlantPlacerPythonRunner
         }
         else
         {
-            if (readingIndex < 256)
-            {
-                ReadLineToCachedArray(e.Data, readingIndex, ref readingData);
-            }
-            else
-            {
-                ReadLineToCachedArray(e.Data, readingIndex - 256, ref readingBushData);
-            }
+            ReadLineToCachedArray(e.Data, readingIndex);
             ++readingIndex;
             if (ReachedEndOfData(readingIndex))
             {
                 cachedPreviousResult.relativeTreePositions = readingData;
-                cachedPreviousResult.relativeBushPositions = readingBushData;
                 ++lastGeneratedGeneration;
                 StopReading();
             }
@@ -108,14 +100,21 @@ public class PlantPlacerPythonRunner
         }
     }
 
-    private void ReadLineToCachedArray(string dataLine, int lineIndex, ref float[,] outputData)
+    private void ReadLineToCachedArray(string dataLine, int lineIndex)
     {
-        var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
-        Assert.IsTrue(numbers.Length >= 256);
-
-        for(var xIndex = 0; xIndex < 256; ++xIndex)
+        try
         {
-            outputData[lineIndex, xIndex] = numbers[xIndex];
+            var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
+            Assert.IsTrue(numbers.Length >= 256);
+
+            for(var xIndex = 0; xIndex < 256; ++xIndex)
+            {
+                readingData[lineIndex, xIndex] = numbers[xIndex];
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError(e.Message);
         }
     }
 
@@ -157,7 +156,7 @@ public class PlantPlacerPythonRunner
 
     static private bool ReachedEndOfData(int lineIndex)
     {
-        return lineIndex >= 256 * 2;
+        return lineIndex >= 256;
     }
 
     private void StopReading()
@@ -168,12 +167,10 @@ public class PlantPlacerPythonRunner
     private Process process;
 
     private float[,] readingData = new float[256,256];
-    private float[,] readingBushData = new float[256,256];
 
     public struct GenerationResult
     {
         public float[,] relativeTreePositions;
-        public float[,] relativeBushPositions;
     }
 
     public GenerationResult CachedPreviousResult => cachedPreviousResult;
