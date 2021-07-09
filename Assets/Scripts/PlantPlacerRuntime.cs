@@ -19,6 +19,8 @@ public class PlantPlacerRuntime : MonoBehaviour
     [SerializeField]
     private GameObject[] spawnableBushPrefab = null;
 
+    public bool spawnBushes = false;
+
     [SerializeField]
     private VegetationPlacer vegetationPlacer;
 
@@ -88,7 +90,10 @@ public class PlantPlacerRuntime : MonoBehaviour
 
             var tileGenerationResults = pythonRunner.CachedPreviousResult;
             EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeTreePositions, VegType.Tree);
-            EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeBushPositions, VegType.Bush);
+            if (spawnBushes)
+            {
+                EnqueueTreePlacements(thisUpdateTile, tileGenerationResults.relativeBushPositions, VegType.Bush);
+            }
         }
     }
 
