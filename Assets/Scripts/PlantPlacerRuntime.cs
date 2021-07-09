@@ -18,6 +18,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private GameObject spawnableTreePrefab = null;
 
     private List<Vector2Int> queuedUpdates = new List<Vector2Int>();
+    private VegetationPlacer vegetationPlacer;
 
     public void OnLandscapeUpdated(Vector2Int tileIndex)
     {
@@ -43,6 +44,7 @@ public class PlantPlacerRuntime : MonoBehaviour
         StartCoroutine(PlaceTrees());
 
         OnLandscapeUpdated(Vector2Int.zero);
+        vegetationPlacer = new VegetationPlacer();
     }
 
     private void SynchronousRegenerateTiles()
@@ -80,10 +82,13 @@ public class PlantPlacerRuntime : MonoBehaviour
         }
     }
 
-    private void EnqueueTreePlacements(Vector2Int updateTile, List<Vector2> tileGenerationResults)
+    private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults)
     {
         var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y) * tileWidth;
-        var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
+        //var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
+
+        var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, updateTile);
+
         queuedTreePlacements.AddRange(worldPositions);
     }
 

@@ -81,7 +81,7 @@ public class PlantPlacerPythonRunner
             ++readingIndex;
             if (ReachedEndOfData(readingIndex))
             {
-                cachedPreviousResult.relativeTreePositions = ConvertProximityMapIntoInstances(readingData);
+                cachedPreviousResult.relativeTreePositions = readingData;
                 ++lastGeneratedGeneration;
                 StopReading();
             }
@@ -109,10 +109,6 @@ public class PlantPlacerPythonRunner
         }
     }
 
-    static private List<Vector2> ConvertProximityMapIntoInstances(float[,] savedData)
-    {
-        return new List<Vector2>();
-    }
 
     public static void WriteMap(float[,] input, StreamWriter output)
     {
@@ -165,7 +161,7 @@ public class PlantPlacerPythonRunner
 
     public struct GenerationResult
     {
-        public List<Vector2> relativeTreePositions;
+        public float[,] relativeTreePositions;
     }
 
     public GenerationResult CachedPreviousResult => cachedPreviousResult;
