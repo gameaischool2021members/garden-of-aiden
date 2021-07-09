@@ -1,13 +1,38 @@
 # Garden of AIden
 ## Description
 
-This tool learns at design time how to place plants based on the environment. When playing the game, the player can shift mountains and hills to change the environment, and the vegetation will update to match its new situation, based on what the agent learnt earlier.
+Live design tool for nature placement. It can be understand as a tool for enviromental artists, saving 
+
+. When playing the game, the player can shift mountains and hills to change the environment, and the vegetation will update to match its new situation, based on what the agent learnt earlier.
 
 ## How to install
 
  1. Clone the project.
  2. Open the project in Unity. The version used to develop the app was 2020.3.13f1.
- 3. Go to the sandbox scene.
+ 
+ Clone the repository .
+You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. 
+
+```bash
+    git clone 
+```
+
+```bash
+pip install -r https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Assets/ModelTraining/requirements.txt
+```
+ 
+ ## Instructions for training
+
+1. From **diorama** scene, using the root training component set **size and number of samples** param. Press start training in editor, workout outside of play mode. 
+
+2. Scans are taken from the diorama, they are converted into an array like structure and then piped over stdin to a python process that parses them into numpy arrays and starts training. 
+
+3. Over the course of training  save models to the filesystem (unity root folder). Once training is complete we can use the python runtime component to spawn the trees when thr landscape is edited
+ 
+ 
+ ## Inference mode
+ 
+ 3. Go to the **sandbox scene**.
  4. Hit play, and start editing the terrain by simply clicking around. The updates to the vegetation should be visible instantaneously.
 
 ## System
