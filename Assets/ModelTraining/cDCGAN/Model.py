@@ -330,7 +330,7 @@ class ModelRunner:
 				#serialized_out = pickle.dumps(output, protocol=0)
 				print('TreeProxMap')
 				print_serialized_arr(output, 0)
-				print_serialized_arr(output, 1)
+				print_serialized_arr(output, 2)
 				# serialize & sent output to stdout
 
 
