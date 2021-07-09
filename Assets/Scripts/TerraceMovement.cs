@@ -16,7 +16,7 @@ public class TerraceMovement : MonoBehaviour
         if (terrainData == null)
             ResetTerrain();
         else
-            terrain.terrainData = terrainData;
+            terrain.terrainData.SetHeights(0, 0, terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution) );
     }
 
     // Update is called once per frame
