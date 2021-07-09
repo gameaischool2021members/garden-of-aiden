@@ -14,6 +14,12 @@ This tool learns at design time how to place plants based on the environment. Wh
 
 ### AI Core
 We are using a customized GAN to learn the desired pattern and rules of the artist initially. After the training is finished, we can use the model to predict the vegetation of the desired terrain which can be modified during the runtime.
+The inputs of the system are the terrain height-map and the current plants textures.
+![System description](https://drive.google.com/uc?export=view&id=1P6VwCGoRIbVhrGwJFpP5Y1qbcWJ3i8Rm)
+#### An example
+![A training example](https://drive.google.com/uc?export=view&id=1vYajD_yfC4vbJIu3oyqm8w_82k3pZRxE)
+The first row of this picture show the height-maps.
+And the last row is the final outputs of the system with two kinds of plants.
 
 ### Unity Interface
 The user can edit the terrain at runtime, and the changes to the vegetation will be applied.
