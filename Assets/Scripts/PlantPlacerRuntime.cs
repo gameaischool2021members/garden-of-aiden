@@ -20,6 +20,9 @@ public class PlantPlacerRuntime : MonoBehaviour
     [SerializeField]
     private VegetationPlacer vegetationPlacer;
 
+    [SerializeField]
+    private float timeBetweenTreePlacements = 0.1f;
+
     private List<Vector2Int> queuedUpdates = new List<Vector2Int>();
 
 
@@ -101,6 +104,7 @@ public class PlantPlacerRuntime : MonoBehaviour
         while (true)
         {
             yield return new WaitUntil(() => queuedTreePlacements.Count > 0);
+            yield return new WaitForSeconds(timeBetweenTreePlacements);
 
             var thisNewTree = queuedTreePlacements.First();
             queuedTreePlacements.RemoveAt(0);
