@@ -15,7 +15,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private Terrain targetTerrain = null;
 
     [SerializeField]
-    private GameObject spawnableTreePrefab = null;
+    private GameObject[] spawnableTreePrefab = null;
 
     [SerializeField]
     private VegetationPlacer vegetationPlacer;
@@ -143,7 +143,7 @@ public class PlantPlacerRuntime : MonoBehaviour
         var treeXzPosition3 = new Vector3(treeXzPosition[0], 0f, treeXzPosition[1]);
         var height = targetTerrain.SampleHeight(treeXzPosition3);
         var treePosition = treeXzPosition3 + Vector3.up * height;
-        var spawnedTree = Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
+        var spawnedTree = Object.Instantiate(selectRandomTree(), treePosition, Quaternion.Euler(new Vector3(0, Random.Range(0f, 360f), 0)));
 
         if (!tileTreeDict.ContainsKey(tile))
         {
@@ -151,6 +151,12 @@ public class PlantPlacerRuntime : MonoBehaviour
         }
         var tileSpawnedTrees = tileTreeDict[tile];
         tileSpawnedTrees.Add(spawnedTree);
+    }
+
+    private GameObject selectRandomTree()
+    {
+        var index = Random.Range(0, spawnableTreePrefab.Length);
+        return spawnableTreePrefab[index];
     }
 
     private float[,] CollectHeightMapAtTile(Vector2Int centerPoint)
