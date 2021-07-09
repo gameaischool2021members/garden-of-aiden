@@ -5,9 +5,12 @@ using UnityEngine;
 //Added this for float to decimal conversion
 using System;
 
-
+[Serializable]
 public class VegetationPlacer
 {
+	[SerializeField]
+	float VegThreshold = 0.5f;
+
 	//The texture
 	private decimal [,] decimalTexture;
 	private int textureSizeX;
@@ -105,7 +108,7 @@ public class VegetationPlacer
 			{
 				// We're not checking crossed out pixels
 				// Also only checking the pixels which have non zero values
-				if (!crossedOutPixels[x, y] && 0 < textureNodes[x, y].value) 
+				if (!crossedOutPixels[x, y] && VegThreshold < (float) textureNodes[x, y].value) 
                 {
 					Vector2Int result = FindVegetationForPixel(textureNodes[x, y]);
 					if(! (result == new Vector2Int(-1, -1)) )
