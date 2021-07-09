@@ -53,7 +53,7 @@ def collect_training_data() -> List[TrainingInstance]:
 
       training_data += [training_instance]
 
-  DEBUG_plot_first_instance(training_data)
+  #DEBUG_plot_first_instance(training_data)
   return training_data
 
 def DEBUG_plot_first_instance(training_data):
