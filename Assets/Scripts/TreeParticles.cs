@@ -42,7 +42,12 @@ public class TreeParticles : MonoBehaviour
         return treeMaterials[materialPosition].color;
     }
 
-    public void DestroyTree()
+    public void BeginDestroyingTree()
+    {
+        GetComponent<Animator>().SetTrigger("Destroy");
+    }
+
+    public void FinishDestroyAnimation()
     {
         GameObject endLeaves = GameObject.Instantiate(leaves, transform.position + new Vector3(0, 21.5f, 0), leaves.transform.rotation);
         leavesParticles = endLeaves.GetComponentInChildren<ParticleSystem>();
