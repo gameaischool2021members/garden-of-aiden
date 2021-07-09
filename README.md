@@ -14,7 +14,7 @@ Live design tool for nature placement. It can be understand as a tool for enviro
 You need Unity version 2020.3.7f1 installed and install requirements.txt placed in ModelTraining folder. 
 
 ```bash
-    git clone 
+    git clone https://github.com/gameaischool2021members/garden-of-aiden
 ```
 
 ```bash
