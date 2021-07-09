@@ -1,6 +1,6 @@
 # Garden of AIden
 
-[<img src="https://github.com/gameaischool2021members/garden-of-aiden/video_icon.png" height="500"> Watch here!](https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Garden_of_AIden_video.mp4)
+[<img src="https://github.com/gameaischool2021members/garden-of-aiden/blob/master/video_icon.png" height="500"> Watch here!](https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Garden_of_AIden_video.mp4)
 
 ## Description
 
