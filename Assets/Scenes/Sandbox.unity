@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -364,6 +364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 1646306715}
+  terrainData: {fileID: 15600000, guid: 08cd509aeb7584706862bf97ae4cb49e, type: 2}
   heightChange: 0.1
   brushRadius: 20
 --- !u!154 &1646306714
@@ -440,12 +441,13 @@ MonoBehaviour:
   tileWidth: 200
   targetTerrain: {fileID: 1646306715}
   spawnableTreePrefab:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 7621256522460385180, guid: d80e49c4e21f9475b96446d67c7c466c, type: 3}
+  - {fileID: 4725101787582647881, guid: 7f2ba5049788442a0aed70bd6f74036c, type: 3}
+  - {fileID: 5234814410241415078, guid: b13d4b6a008bf4125a2707bfe73da643, type: 3}
+  - {fileID: 8564027664397903025, guid: 8afba361b8aa244db8f1566441a5d81c, type: 3}
   vegetationPlacer:
     VegThreshold: 0.2
-  timeBetweenTreePlacements: 0
+  timeBetweenTreePlacements: 0.00001
 --- !u!114 &1646306718
 MonoBehaviour:
   m_ObjectHideFlags: 0
