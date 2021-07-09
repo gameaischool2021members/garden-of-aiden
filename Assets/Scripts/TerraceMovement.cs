@@ -28,8 +28,11 @@ public class TerraceMovement : MonoBehaviour
                 if (hit.collider != null)
                 {
                     // find the heightmap position of hit for putting it OnMouseDown
-                    float relativeHitTerX = (hit.point.x - terrain.transform.position.x) / terrain.terrainData.size.x;
-                    float relativeHitTerZ = (hit.point.z - terrain.transform.position.z) / terrain.terrainData.size.z;
+                    float hitTerOffsetX = (hit.point.x - terrain.transform.position.x);
+                    float hitTerOffsetZ = (hit.point.z - terrain.transform.position.z);
+
+                    float relativeHitTerX = hitTerOffsetX / terrain.terrainData.size.x;
+                    float relativeHitTerZ = hitTerOffsetZ / terrain.terrainData.size.z;
 
                     float relativeTerCoordX = terrain.terrainData.heightmapResolution * relativeHitTerX;
                     float relativeTerCoordZ = terrain.terrainData.heightmapResolution * relativeHitTerZ;
@@ -43,6 +46,8 @@ public class TerraceMovement : MonoBehaviour
 
                     terrain.terrainData.SetHeights(0, 0, heights);
                     terrain.terrainData.SyncHeightmap();
+
+                    NotifyPlantPlacerTerrainChanged(new Vector2(hitTerOffsetX, hitTerOffsetZ));
                 }
             }
         }
@@ -107,6 +112,14 @@ public class TerraceMovement : MonoBehaviour
         var cosResult = Mathf.Cos(t * Mathf.PI);
         var impact = (cosResult + 1f) * 0.5f;
         return impact;
+    }
+
+    private void NotifyPlantPlacerTerrainChanged(Vector2 relativeTerrainOffset)
+    {
+        var plantPlacer = GetComponent<PlantPlacerRuntime>();
+        var targetTileFloat = relativeTerrainOffset / plantPlacer.tileWidth;
+        var targetTile = new Vector2Int(Mathf.RoundToInt(targetTileFloat.x), Mathf.RoundToInt(targetTileFloat.y));
+        plantPlacer.OnLandscapeUpdated(targetTile);
     }
 
     private bool mouseIsDown = false;
