@@ -9,7 +9,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private PlantPlacerModel model = null;
 
     [SerializeField]
-    private float tileWidth = 10f;
+    private float tileWidth = 200f;
 
     [SerializeField]
     private Terrain targetTerrain = null;
@@ -17,8 +17,11 @@ public class PlantPlacerRuntime : MonoBehaviour
     [SerializeField]
     private GameObject spawnableTreePrefab = null;
 
-    private List<Vector2Int> queuedUpdates = new List<Vector2Int>();
+    [SerializeField]
     private VegetationPlacer vegetationPlacer;
+
+    private List<Vector2Int> queuedUpdates = new List<Vector2Int>();
+
 
     public void OnLandscapeUpdated(Vector2Int tileIndex)
     {
@@ -84,10 +87,11 @@ public class PlantPlacerRuntime : MonoBehaviour
 
     private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults)
     {
+        Debug.Log($"Tile co-ords: {updateTile}");
         var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y) * tileWidth;
         //var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
 
-        var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, updateTile);
+        var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, tileWorldOrigin);
 
         queuedTreePlacements.AddRange(worldPositions);
     }
