@@ -58,7 +58,7 @@ public class PlantPlacerPythonRunner
 
     private void OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
-        UnityEngine.Debug.Log(e.Data);
+        //UnityEngine.Debug.Log(e.Data);
 
         if (String.IsNullOrEmpty(e.Data))
         {
