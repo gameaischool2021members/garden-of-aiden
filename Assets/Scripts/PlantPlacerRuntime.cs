@@ -9,7 +9,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private PlantPlacerModel model = null;
 
     [SerializeField]
-    private float tileWidth = 200f;
+    public float tileWidth = 200f;
 
     [SerializeField]
     private Terrain targetTerrain = null;
