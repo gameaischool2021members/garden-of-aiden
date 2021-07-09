@@ -447,7 +447,7 @@ MonoBehaviour:
   - {fileID: 8564027664397903025, guid: 8afba361b8aa244db8f1566441a5d81c, type: 3}
   spawnableBushPrefab:
   - {fileID: 2244621927542206426, guid: c8025122670542a4cbac0af93051ba9c, type: 3}
-  spawnBushes: 0
+  spawnBushes: 1
   vegetationPlacer:
     VegThreshold: 0.2
   timeBetweenTreePlacements: 0.00001
