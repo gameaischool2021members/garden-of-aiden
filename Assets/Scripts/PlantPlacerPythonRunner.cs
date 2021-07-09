@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class PlantPlacerPythonRunner
 {
@@ -78,7 +79,6 @@ public class PlantPlacerPythonRunner
         else
         {
             ReadLineToCachedArray(e.Data, readingIndex);
-            UnityEngine.Debug.LogFormat("Read line {0}", readingIndex);
             ++readingIndex;
             if (ReachedEndOfData(readingIndex))
             {
@@ -102,11 +102,19 @@ public class PlantPlacerPythonRunner
 
     private void ReadLineToCachedArray(string dataLine, int lineIndex)
     {
-        var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
-
-        for(var xIndex = 0; xIndex < 256; ++xIndex)
+        try
         {
-            readingData[lineIndex, xIndex] = numbers[xIndex];
+            var numbers = dataLine.Split(' ').Select(individualNumberString => float.Parse(individualNumberString)).ToArray();
+            Assert.IsTrue(numbers.Length >= 256);
+
+            for(var xIndex = 0; xIndex < 256; ++xIndex)
+            {
+                readingData[lineIndex, xIndex] = numbers[xIndex];
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError(e.Message);
         }
     }
 

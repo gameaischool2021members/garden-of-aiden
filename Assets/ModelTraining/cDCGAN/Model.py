@@ -340,7 +340,7 @@ def print_serialized_arr(numpy_arr):
 	first_element = first_element[:, :, 0]
 	for row in first_element:
 		print(' '.join(str(val) for val in row))
-	print()
+	print('', flush=True)
 	pass
 
 # for rapid testing with different data shapes
