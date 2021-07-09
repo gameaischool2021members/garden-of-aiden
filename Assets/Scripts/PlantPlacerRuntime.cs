@@ -49,7 +49,7 @@ public class PlantPlacerRuntime : MonoBehaviour
         //SynchronousRegenerateTiles();
         StartCoroutine(PlaceTrees());
 
-        OnLandscapeUpdated(Vector2Int.zero);
+        OnLandscapeUpdated(new Vector2Int((int)tileWidth/2, (int)tileWidth/2));
         vegetationPlacer = new VegetationPlacer();
     }
 
@@ -91,7 +91,7 @@ public class PlantPlacerRuntime : MonoBehaviour
     private void EnqueueTreePlacements(Vector2Int updateTile, float[,] tileGenerationResults)
     {
         Debug.Log($"Tile co-ords: {updateTile}");
-        var tileWorldOrigin = new Vector2(updateTile.x, updateTile.y) * tileWidth;
+        var tileWorldOrigin = new Vector2(updateTile.x + (tileWidth / 2), updateTile.y + (tileWidth / 2));
         //var worldPositions = tileGenerationResults.Select(localTreePosition => tileWorldOrigin + localTreePosition);
 
         var worldPositions = vegetationPlacer.GetVegetationPositionsInWorld(tileGenerationResults, tileWidth, tileWorldOrigin);
@@ -121,9 +121,23 @@ public class PlantPlacerRuntime : MonoBehaviour
         Object.Instantiate(spawnableTreePrefab, treePosition, Quaternion.identity);
     }
 
-    private float[,] CollectHeightMapAtTile(Vector2Int tile)
+    private float[,] CollectHeightMapAtTile(Vector2Int centerPoint)
     {
-        return new float[256,256];
+        var heightMapResolution = 256;
+        var heightMap = new float[heightMapResolution, heightMapResolution];
+        var cornerOrigin2d = centerPoint - Vector2.one * tileWidth / 2f;
+        var cornerOrigin = Vector3.right * cornerOrigin2d.x + Vector3.forward * cornerOrigin2d.y;
+        for (var x = 0; x < heightMapResolution; ++x)
+        {
+            for (var y = 0; y < heightMapResolution; ++y)
+            {
+                var offset = (Vector3.right * x + Vector3.forward * y) * tileWidth / heightMapResolution;
+                var pollPosition = cornerOrigin + offset;
+                heightMap[x, y] = targetTerrain.SampleHeight(pollPosition);
+            }
+        }
+        
+        return heightMap;
     }
 
     private List<Vector2> queuedTreePlacements = new List<Vector2>();
