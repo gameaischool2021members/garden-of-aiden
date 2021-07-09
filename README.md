@@ -18,7 +18,7 @@ You need Unity version 2020.3.7f1 installed and install requirements.txt placed 
 ```
 
 ```bash
-pip install -r https://github.com/gameaischool2021members/garden-of-aiden/blob/master/Assets/ModelTraining/requirements.txt
+pip install -r Assets/ModelTraining/requirements.txt
 ```
 ```bash 
 pip install -e <path to Assets/ModelTraining folder>
