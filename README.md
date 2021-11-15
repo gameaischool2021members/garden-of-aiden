@@ -4,9 +4,9 @@
 
 ## Description
 
-Live design tool for nature placement. It can be understand as a tool for enviromental artists, saving 
+This project is a real-time design tool for nature placement. It can be understood as a tool for environmental artists, saving them a ton of time by reducing the need for the tedious task of placing assets one-by-one to build up the environment.
 
-. When playing the game, the player can shift mountains and hills to change the environment, and the vegetation will update to match its new situation, based on what the agent learnt earlier.
+When playing the game, the player can shift mountains and hills to change the terrain, and the vegetation will update to match its new situation, based on what the agent learnt earlier.
 
 ## How to install
 
